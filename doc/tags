@@ -1,0 +1,5 @@
+NvimUnstack.disable()	nvim-unstack.txt	/*NvimUnstack.disable()*
+NvimUnstack.enable()	nvim-unstack.txt	/*NvimUnstack.enable()*
+NvimUnstack.options	nvim-unstack.txt	/*NvimUnstack.options*
+NvimUnstack.setup()	nvim-unstack.txt	/*NvimUnstack.setup()*
+NvimUnstack.toggle()	nvim-unstack.txt	/*NvimUnstack.toggle()*

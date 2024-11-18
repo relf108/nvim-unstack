@@ -1,0 +1,46 @@
+==============================================================================
+------------------------------------------------------------------------------
+                                                          *NvimUnstack.toggle()*
+                             `NvimUnstack.toggle`()
+Toggle the plugin by calling the `enable`/`disable` methods respectively.
+
+------------------------------------------------------------------------------
+                                                          *NvimUnstack.enable()*
+                         `NvimUnstack.enable`({scope})
+Initializes the plugin, sets event listeners and internal state.
+
+------------------------------------------------------------------------------
+                                                         *NvimUnstack.disable()*
+                            `NvimUnstack.disable`()
+Disables the plugin, clear highlight groups and autocmds, closes side buffers and resets the internal state.
+
+
+==============================================================================
+------------------------------------------------------------------------------
+                                                           *NvimUnstack.options*
+                             `NvimUnstack.options`
+NvimUnstack configuration with its default values.
+
+Type ~
+`(table)`
+Default values:
+>lua
+  NvimUnstack.options = {
+      -- Prints useful logs about what event are triggered, and reasons actions are executed.
+      debug = false,
+  }
+
+<
+------------------------------------------------------------------------------
+                                                           *NvimUnstack.setup()*
+                         `NvimUnstack.setup`({options})
+Define your nvim-unstack setup.
+
+Parameters ~
+{options} `(table)` Module config table. See |NvimUnstack.options|.
+
+Usage ~
+`require("nvim-unstack").setup()` (add `{}` with your |NvimUnstack.options| table)
+
+
+ vim:tw=78:ts=8:noet:ft=help:norl:
