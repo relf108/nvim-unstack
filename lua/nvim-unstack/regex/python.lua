@@ -1,1 +1,1 @@
-return '\v^ *File "([^"]+)", line ([0-9]+).*', "\1", "\2"
+return vim.regex([[\v^ *File "([^"]+)", line ([0-9]+).*]])

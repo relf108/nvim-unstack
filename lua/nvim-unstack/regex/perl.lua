@@ -1,1 +1,1 @@
-return "\v^%(Trace begun|.+ called) at (.+) line (d+)$", "\1", "\2"
+return vim.regex([[\v^[ \t]*(.+):(\d+) \+0x\x+$]])

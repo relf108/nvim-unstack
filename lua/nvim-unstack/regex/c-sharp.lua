@@ -1,1 +1,1 @@
-return "\v^[ \t]*at .*(.*) in (.+):line ([0-9]+) *$", "\1", "\2"
+return vim.regex([[\v^[ \t]*at .*\(.*\) in (.+):line ([0-9]+) *$]])
