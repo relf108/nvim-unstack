@@ -49,7 +49,3 @@ luals:
 	mkdir -p .ci/lua-ls
 	curl -sL "https://github.com/LuaLS/lua-language-server/releases/download/3.7.4/lua-language-server-3.7.4-darwin-x64.tar.gz" | tar xzf - -C "${PWD}/.ci/lua-ls"
 	make luals-ci
-
-# setup
-setup:
-	./scripts/setup.sh
