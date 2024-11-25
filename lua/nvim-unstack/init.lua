@@ -1,19 +1,32 @@
 local main = require("nvim-unstack.main")
 local config = require("nvim-unstack.config")
 local getVisualSelection = require("nvim-unstack.util.get-visual-selection")
+local openMatches = require("nvim-unstack.util.open-matches")
 
 local NvimUnstack = {}
 
 -- Parse a visually selected traceback.
 function NvimUnstack.unstack()
-    local selection = getVisualSelection()
-    local filetype = tostring(vim.bo.filetype)
-    local match = require("nvim-unstack.regex.python"):match_str(
-        [[File "/opt/anaconda3/envs/icharge-dispatcher/lib/python3.11/site-packages/vpp/enode/db.py", line 30, in data_store]]
-    )
-    -- for each line in selection if match == 0 (matched) add to a new filtered array
-    print(match)
-    print(vim.inspect(selection))
+    local matches = {}
+
+    local status, parser = pcall(function()
+        return require("nvim-unstack.regex." .. vim.bo.filetype)
+    end)
+
+    if not status then
+        vim.notify(
+            "No traceback parsers found for " .. vim.bo.filetype .. ".",
+            vim.log.levels.ERROR
+        )
+        return
+    end
+
+    for _, line in ipairs(getVisualSelection()) do
+        if parser.regex:match_str(line) == 0 then
+            table.insert(matches, parser.format_match(line))
+        end
+    end
+    openMatches(matches)
 end
 
 --- Toggle the plugin by calling the `enable`/`disable` methods respectively.
