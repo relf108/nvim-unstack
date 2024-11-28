@@ -9,6 +9,7 @@ local NvimUnstack = {}
 function NvimUnstack.unstack()
     local matches = {}
 
+    -- TODO @suttont: determine filetype based on something else, this returns 'dapui_console' when trying to unstack
     local status, parser = pcall(function()
         return require("nvim-unstack.regex." .. vim.bo.filetype)
     end)
