@@ -2,27 +2,26 @@ local main = require("nvim-unstack.main")
 local config = require("nvim-unstack.config")
 local getVisualSelection = require("nvim-unstack.util.get-visual-selection")
 local openMatches = require("nvim-unstack.util.open-matches")
+local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
 
 local NvimUnstack = {}
 
 -- Parse a visually selected traceback.
 function NvimUnstack.unstack()
     local matches = {}
+    local selection = getVisualSelection()
 
     -- TODO @suttont: determine filetype based on something else, this returns 'dapui_console' when trying to unstack
     local status, parser = pcall(function()
-        return require("nvim-unstack.regex." .. vim.bo.filetype)
+        return tracebackFiletype(selection)
     end)
 
     if not status then
-        vim.notify(
-            "No traceback parsers found for " .. vim.bo.filetype .. ".",
-            vim.log.levels.ERROR
-        )
+        vim.notify("No traceback parsers found.", vim.log.levels.ERROR)
         return
     end
 
-    for _, line in ipairs(getVisualSelection()) do
+    for _, line in ipairs(selection) do
         if parser.regex:match_str(line) == 0 then
             table.insert(matches, parser.format_match(line))
         end
