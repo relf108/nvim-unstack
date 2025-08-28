@@ -10,6 +10,18 @@ local NvimUnstack = {}
 NvimUnstack.options = {
     -- Prints useful logs about what event are triggered, and reasons actions are executed.
     debug = false,
+
+    -- Layout configuration
+    layout = "tab", -- "vsplit", "split", "tab", "floating"
+
+    -- Key mapping for visual selection unstacking
+    mapkey = "<leader>s",
+
+    -- Show signs on lines from stack trace
+    showsigns = true,
+
+    -- Vertical alignment for splits
+    vertical_alignment = "topleft", -- "topleft", "topright", "bottomleft", "bottomright"
 }
 
 ---@private
@@ -27,6 +39,19 @@ function NvimUnstack.defaults(options)
     assert(
         type(NvimUnstack.options.debug) == "boolean",
         "`debug` must be a boolean (`true` or `false`)."
+    )
+
+    local valid_layouts = { "vsplit", "split", "tab", "floating" }
+    assert(
+        vim.tbl_contains(valid_layouts, NvimUnstack.options.layout),
+        "`layout` must be one of: " .. table.concat(valid_layouts, ", ")
+    )
+
+    assert(type(NvimUnstack.options.mapkey) == "string", "`mapkey` must be a string.")
+
+    assert(
+        type(NvimUnstack.options.showsigns) == "boolean",
+        "`showsigns` must be a boolean (`true` or `false`)."
     )
 
     return NvimUnstack.options

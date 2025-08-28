@@ -26,9 +26,17 @@ else
     vim.api.nvim_create_user_command("NvimUnstackToggle", function()
         require("nvim-unstack").toggle()
     end, {})
+    vim.api.nvim_create_user_command("UnstackFromClipboard", function()
+        require("nvim-unstack").unstack_from_clipboard()
+    end, { desc = "Unstack traceback from system clipboard" })
+    vim.api.nvim_create_user_command("UnstackFromTmux", function()
+        require("nvim-unstack").unstack_from_tmux()
+    end, { desc = "Unstack traceback from tmux paste buffer" })
 
-    -- Default keymaps, need to decide if these should be here or even exist.
-    vim.keymap.set("v", "<leader>x", function()
+    -- Default keymaps using configurable mapkey
+    local config = _G.NvimUnstack and _G.NvimUnstack.config
+        or require("nvim-unstack.config").options
+    vim.keymap.set("v", config.mapkey, function()
         require("nvim-unstack").unstack()
-    end, {})
+    end, { desc = "Unstack visual selection" })
 end
