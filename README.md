@@ -40,6 +40,7 @@
 nvim-unstack comes with built-in support for parsing stack traces from:
 
 - **Python** - Standard Python tracebacks with file paths and line numbers
+- **Pytest** - Pytest test failure tracebacks and assertion errors
 - **Node.js** - JavaScript stack traces with file locations
 - **Ruby** - Ruby exception backtraces
 - **Go** - Go panic stack traces and error messages
@@ -156,6 +157,19 @@ Traceback (most recent call last):
     result = process_data(data)
   File "/path/to/myproject/utils.py", line 15, in process_data
     return transform(data)
+```
+
+Or this Pytest failure:
+
+```
+=================================== FAILURES ===================================
+____________________________ test_my_function __________________________________
+
+    def test_my_function():
+>       assert result == expected
+E       AssertionError: assert 15 == 10
+
+tests/test_example.py:42: AssertionError
 ```
 
 Simply select the traceback text and press `<leader>s`. The plugin will:
@@ -311,6 +325,7 @@ You can extend nvim-unstack to support additional languages by creating custom r
 
 ```lua
 -- Example: Custom Java parser
+-- Save to nvim-unstack/regex
 
 local java = {}
 

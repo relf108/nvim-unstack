@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Pytest traceback parsing support
 - Comprehensive documentation with detailed configuration options
 - API documentation for programmatic usage
 - Examples for custom language parser creation

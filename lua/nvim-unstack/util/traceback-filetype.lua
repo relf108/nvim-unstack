@@ -5,6 +5,7 @@ return function(selection)
     -- List of available parsers
     local parsers = {
         "python",
+        "pytest",
         "nodejs",
         "ruby",
         "go",
