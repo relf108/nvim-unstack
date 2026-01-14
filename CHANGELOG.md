@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-01-14
+
+### Added
+- Comprehensive test suite with 32 tests covering all parsers and features
+- Tests for Python, Pytest, Node.js, Ruby, and Go parsers
+- Configuration validation tests
+- Error handling tests
+- Parser edge case tests
+- Multiple match extraction tests
+
+### Changed
+- Improved Makefile with better dependency management and help system
+- Added `make help`, `make clean`, and improved CI targets
+- Enhanced documentation generation workflow
+- All internal parser functions now properly marked as `@private`
+- Updated README with accurate configuration options
+
+### Fixed
+- Node.js parser now correctly extracts file paths (fixed parenthesis matching)
+- Go parser now strips leading whitespace from file paths
+- Removed non-functional `vertical_alignment` configuration option
+- Documentation now only exposes public API (NvimUnstack.options and NvimUnstack.setup)
+- Added missing `@param` and `@return` annotations to all parsers
+
+## [1.0.1] - Previous Release
+
 ### Added
 - Pytest traceback parsing support
 - Comprehensive documentation with detailed configuration options
@@ -22,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Documentation consistency across README and help files
 
-## [1.0.0] - Previous Release
+## [1.0.0] - Initial Release
 
 ### Added
 - Multi-language stack trace parsing (Python, Node.js, Ruby, Go, C#, Perl, GDB/LLDB)
