@@ -1,4 +1,3 @@
-local main = require("nvim-unstack.main")
 local config = require("nvim-unstack.config")
 local getVisualSelection = require("nvim-unstack.util.get-visual-selection")
 local openMatches = require("nvim-unstack.util.open-matches")
@@ -61,20 +60,9 @@ function NvimUnstack.unstack_from_tmux()
     openMatches(matches)
 end
 
---- Toggle the plugin by calling the `enable`/`disable` methods respectively.
-function NvimUnstack.toggle()
-    if _G.NvimUnstack.config == nil then
-        _G.NvimUnstack.config = config.options
-    end
-
-    main.toggle("public_api_toggle")
-end
-
---- Initializes the plugin, sets event listeners and internal state.
-function NvimUnstack.enable(scope)
-    if _G.NvimUnstack.config == nil then
-        _G.NvimUnstack.config = config.options
-    end
+-- setup NvimUnstack options and merge them with user provided ones.
+function NvimUnstack.setup(opts)
+    _G.NvimUnstack.config = config.setup(opts)
 
     -- Define signs for highlighting stack trace lines
     if _G.NvimUnstack.config.showsigns then
@@ -84,18 +72,6 @@ function NvimUnstack.enable(scope)
             linehl = "CursorLine",
         })
     end
-
-    main.toggle(scope or "public_api_enable")
-end
-
---- Disables the plugin, clear highlight groups and autocmds, closes side buffers and resets the internal state.
-function NvimUnstack.disable()
-    main.toggle("public_api_disable")
-end
-
--- setup NvimUnstack options and merge them with user provided ones.
-function NvimUnstack.setup(opts)
-    _G.NvimUnstack.config = config.setup(opts)
 end
 
 _G.NvimUnstack = NvimUnstack

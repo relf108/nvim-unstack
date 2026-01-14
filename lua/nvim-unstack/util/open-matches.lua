@@ -1,15 +1,9 @@
+-- Open matched files from stack trace.
+
 ---@param matches table: the file path to jump to.
+---@private
 return function(matches)
     local config = _G.NvimUnstack.config or require("nvim-unstack.config").options
-
-    -- Ensure signs are defined if showsigns is enabled
-    if config.showsigns then
-        vim.fn.sign_define("UnstackLine", {
-            text = ">>",
-            texthl = "Search",
-            linehl = "CursorLine",
-        })
-    end
 
     if #matches == 0 then
         return
@@ -43,7 +37,7 @@ return function(matches)
                 -- Set up signs if configured
                 if config.showsigns then
                     vim.fn.sign_place(0, "UnstackSigns", "UnstackLine", buf, {
-                        lnum = tonumber(line_num),
+                        lnum = line_num,
                     })
                 end
             end
@@ -84,7 +78,7 @@ return function(matches)
                         "UnstackLine",
                         vim.api.nvim_get_current_buf(),
                         {
-                            lnum = tonumber(line_num),
+                            lnum = line_num,
                         }
                     )
                 end
@@ -115,7 +109,7 @@ return function(matches)
                         "UnstackLine",
                         vim.api.nvim_get_current_buf(),
                         {
-                            lnum = tonumber(line_num),
+                            lnum = line_num,
                         }
                     )
                 end

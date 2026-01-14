@@ -19,9 +19,6 @@ NvimUnstack.options = {
 
     -- Show signs on lines from stack trace
     showsigns = true,
-
-    -- Vertical alignment for splits
-    vertical_alignment = "topleft", -- "topleft", "topright", "bottomleft", "bottomright"
 }
 
 ---@private
@@ -33,7 +30,7 @@ local defaults = vim.deepcopy(NvimUnstack.options)
 ---
 ---@private
 function NvimUnstack.defaults(options)
-    NvimUnstack.options = vim.deepcopy(vim.tbl_deep_extend("keep", options or {}, defaults or {}))
+    NvimUnstack.options = vim.tbl_deep_extend("keep", options or {}, defaults or {})
 
     -- let your user know that they provided a wrong value, this is reported when your plugin is executed.
     assert(

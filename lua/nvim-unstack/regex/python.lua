@@ -6,6 +6,7 @@ python.regex = vim.regex([[\v^ *File "([^"]+)"]])
 ---@param lines table: all lines for multiline parsing
 ---@param index number: current line index
 ---@return table
+---@private
 function python.format_match(line, lines, index)
     local file = line:match([["([^"]+)"]])
     local line_num = line:match([[line ([0-9]+)]])

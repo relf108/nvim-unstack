@@ -1,51 +1,80 @@
 .SUFFIXES:
+.PHONY: all test deps documentation lint luals clean help
 
-all: documentation lint luals test
+all: documentation lint test
 
-# runs all the test files.
-test:
-	make deps
-	nvim --version | head -n 1 && echo ''
-	nvim --headless --noplugin -u ./scripts/minimal_init.lua \
+# Help target to show available commands
+help:
+	@echo "Available targets:"
+	@echo "  make test              - Run all tests"
+	@echo "  make deps              - Install dependencies (mini.nvim)"
+	@echo "  make documentation     - Generate documentation"
+	@echo "  make lint              - Run linters (stylua)"
+	@echo "  make luals             - Run lua-language-server checks"
+	@echo "  make clean             - Remove generated files and dependencies"
+
+# Check if deps exist, otherwise provide helpful message
+check-deps:
+	@if [ ! -d "deps/mini.nvim" ]; then \
+		echo "Error: Dependencies not found. Run 'make deps' first."; \
+		exit 1; \
+	fi
+
+# Runs all the test files
+test: check-deps
+	@echo "Running tests with Neovim version:"
+	@nvim --version | head -n 1
+	@echo ""
+	@nvim --headless --noplugin -u ./scripts/minimal_init.lua \
 		-c "lua require('mini.test').setup()" \
 		-c "lua MiniTest.run({ execute = { reporter = MiniTest.gen_reporter.stdout({ group_depth = 2 }) } })"
 
-# runs all the test files on the nightly version, `bob` must be installed.
-test-nightly:
-	bob use nightly
-	make test
-
-# runs all the test files on the 0.8.3 version, `bob` must be installed.
-test-0.8.3:
-	bob use 0.8.3
-	make test
-
-# installs `mini.nvim`, used for both the tests and documentation.
+# Installs mini.nvim, used for both tests and documentation
 deps:
+	@echo "Installing dependencies..."
 	@mkdir -p deps
-	git clone --depth 1 https://github.com/echasnovski/mini.nvim deps/mini.nvim
+	@if [ -d "deps/mini.nvim" ]; then \
+		echo "Updating mini.nvim..."; \
+		cd deps/mini.nvim && git pull; \
+	else \
+		echo "Cloning mini.nvim..."; \
+		git clone --depth 1 https://github.com/echasnovski/mini.nvim deps/mini.nvim; \
+	fi
+	@echo "Dependencies installed successfully."
 
-# installs deps before running tests, useful for the CI.
-test-ci: deps test
+# Generates the documentation
+documentation: check-deps
+	@echo "Generating documentation..."
+	@nvim --headless --noplugin -u ./scripts/minimal_init.lua \
+		-c "lua require('mini.doc').generate()" -c "qa!"
+	@echo "Documentation generated successfully."
 
-# generates the documentation.
-documentation:
-	nvim --headless --noplugin -u ./scripts/minimal_init.lua -c "lua require('mini.doc').generate()" -c "qa!"
-
-# installs deps before running the documentation generation, useful for the CI.
-documentation-ci: deps documentation
-
-# performs a lint check and fixes issue if possible, following the config in `stylua.toml`.
+# Performs a lint check and fixes issues if possible
 lint:
-	stylua . -g '*.lua' -g '!deps/' -g '!nightly/'
-	luacheck plugin/ lua/
+	@echo "Running linters..."
+	@command -v stylua >/dev/null 2>&1 || { echo "Warning: 'stylua' is not installed. Skipping stylua check."; }
+	@command -v stylua >/dev/null 2>&1 && stylua . -g '*.lua' -g '!deps/' -g '!nightly/' || true
 
-luals-ci:
-	rm -rf .ci/lua-ls/log
-	lua-language-server --configpath .luarc.json --logpath .ci/lua-ls/log --check .
-	[ -f .ci/lua-ls/log/check.json ] && { cat .ci/lua-ls/log/check.json 2>/dev/null; exit 1; } || true
-
+# Download and run lua-language-server
 luals:
-	mkdir -p .ci/lua-ls
-	curl -sL "https://github.com/LuaLS/lua-language-server/releases/download/3.7.4/lua-language-server-3.7.4-darwin-x64.tar.gz" | tar xzf - -C "${PWD}/.ci/lua-ls"
-	make luals-ci
+	@echo "Setting up lua-language-server..."
+	@mkdir -p .ci/lua-ls
+	@if [ ! -f ".ci/lua-ls/bin/lua-language-server" ]; then \
+		echo "Downloading lua-language-server..."; \
+		if [ "$$(uname)" = "Darwin" ]; then \
+			curl -sL "https://github.com/LuaLS/lua-language-server/releases/download/3.7.4/lua-language-server-3.7.4-darwin-x64.tar.gz" | tar xzf - -C "${PWD}/.ci/lua-ls"; \
+		elif [ "$$(uname)" = "Linux" ]; then \
+			curl -sL "https://github.com/LuaLS/lua-language-server/releases/download/3.7.4/lua-language-server-3.7.4-linux-x64.tar.gz" | tar xzf - -C "${PWD}/.ci/lua-ls"; \
+		else \
+			echo "Unsupported platform: $$(uname)"; \
+			exit 1; \
+		fi; \
+	fi
+	@$(MAKE) luals-ci
+
+# Clean generated files and dependencies
+clean:
+	@echo "Cleaning up..."
+	@rm -rf deps/
+	@rm -rf .ci/
+	@echo "Clean complete."

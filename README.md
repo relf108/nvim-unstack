@@ -196,10 +196,6 @@ require("nvim-unstack").setup({
 
   -- Show signs on lines from stack trace (default: true)
   showsigns = true,
-
-  -- Vertical alignment for splits (default: "topleft")
-  -- Options: "topleft", "topright", "bottomleft", "bottomright"
-  vertical_alignment = "topleft",
 })
 ```
 
@@ -235,7 +231,6 @@ require("nvim-unstack").setup({
   layout = "tab",
   mapkey = "<leader>s",
   showsigns = true,
-  vertical_alignment = "topleft",
 })
 ```
 
@@ -250,9 +245,6 @@ nvim-unstack provides several commands for different use cases:
 | `:NvimUnstack`          | Parse stack trace from current visual selection |
 | `:UnstackFromClipboard` | Parse stack trace from system clipboard         |
 | `:UnstackFromTmux`      | Parse stack trace from tmux paste buffer        |
-| `:NvimUnstackEnable`    | Enable the plugin                               |
-| `:NvimUnstackDisable`   | Disable the plugin                              |
-| `:NvimUnstackToggle`    | Toggle the plugin on/off                        |
 
 ### Command Usage Examples
 
@@ -265,9 +257,6 @@ nvim-unstack provides several commands for different use cases:
 
 " Parse from tmux buffer
 :UnstackFromTmux
-
-" Toggle plugin state
-:NvimUnstackToggle
 ```
 
 ## 🔧 API
@@ -287,11 +276,6 @@ nvim_unstack.unstack_from_clipboard()
 
 -- Parse from tmux paste buffer
 nvim_unstack.unstack_from_tmux()
-
--- Plugin control
-nvim_unstack.enable()
-nvim_unstack.disable()
-nvim_unstack.toggle()
 
 -- Setup with custom configuration
 nvim_unstack.setup({

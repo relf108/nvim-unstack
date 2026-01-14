@@ -25,11 +25,6 @@ T["setup()"]["sets exposed methods and default options value"] = function()
     -- global object that holds your plugin information
     Helpers.expect.global_type(child, "_G.NvimUnstack", "table")
 
-    -- public methods
-    Helpers.expect.global_type(child, "_G.NvimUnstack.toggle", "function")
-    Helpers.expect.global_type(child, "_G.NvimUnstack.disable", "function")
-    Helpers.expect.global_type(child, "_G.NvimUnstack.enable", "function")
-
     -- config
     Helpers.expect.global_type(child, "_G.NvimUnstack.config", "table")
 

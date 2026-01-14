@@ -1,6 +1,8 @@
 -- Determine associated filetype of stacktrace.
 
 ---@param selection table
+---@return table parser
+---@private
 return function(selection)
     -- List of available parsers
     local parsers = {

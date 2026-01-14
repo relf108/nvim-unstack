@@ -1,150 +1,36 @@
-*nvim-unstack.txt*    Parse and navigate stack traces from multiple languages
-
-==============================================================================
-CONTENTS                                                   *nvim-unstack-contents*
-
-1. Introduction .................... |nvim-unstack-introduction|
-2. Setup ........................... |nvim-unstack-setup|
-3. Configuration ................... |nvim-unstack-configuration|
-4. Commands ........................ |nvim-unstack-commands|
-5. API ............................. |nvim-unstack-api|
-6. Supported Languages ............. |nvim-unstack-languages|
-
-==============================================================================
-1. INTRODUCTION                                        *nvim-unstack-introduction*
-
-nvim-unstack is a powerful Neovim plugin for parsing and navigating stack traces
-from multiple programming languages. It allows you to quickly jump to files and
-line numbers referenced in stack traces with configurable layouts and visual
-indicators.
-
-Features:
-• Multi-language support with built-in parsers
-• Flexible layout options (tabs, splits, floating windows)
-• Visual indicators for stack trace lines
-• Multiple input methods (visual selection, clipboard, tmux)
-• Easy extensibility for custom parsers
-
-==============================================================================
-2. SETUP                                                      *nvim-unstack-setup*
-
-Basic setup with default configuration:
->lua
-    require("nvim-unstack").setup()
-<
-
-With custom configuration:
->lua
-    require("nvim-unstack").setup({
-        layout = "floating",
-        mapkey = "<leader>u",
-        showsigns = true,
-        debug = false
-    })
-<
-
-==============================================================================
-3. CONFIGURATION                                      *nvim-unstack-configuration*
-
                                                            *NvimUnstack.options*
-All configuration options with their default values:
+                             `NvimUnstack.options`
+NvimUnstack configuration with its default values.
 
+Type ~
+`(table)`
+Default values:
 >lua
-    require("nvim-unstack").setup({
-        -- Print debug information (default: false)
-        debug = false,
-        
-        -- Layout for opening files (default: "tab")
-        -- Options: "tab", "vsplit", "split", "floating"
-        layout = "tab",
-        
-        -- Key mapping for visual selection unstacking (default: "<leader>s")
-        mapkey = "<leader>s",
-        
-        -- Show signs on lines from stack trace (default: true)
-        showsigns = true,
-        
-        -- Vertical alignment for splits (default: "topleft")
-        vertical_alignment = "topleft",
-    })
+  NvimUnstack.options = {
+      -- Prints useful logs about what event are triggered, and reasons actions are executed.
+      debug = false,
+
+      -- Layout configuration
+      layout = "tab", -- "vsplit", "split", "tab", "floating"
+
+      -- Key mapping for visual selection unstacking
+      mapkey = "<leader>s",
+
+      -- Show signs on lines from stack trace
+      showsigns = true,
+  }
+
 <
-
-Layout Options:
-• "tab" (default) - Opens files as vertical splits in a new tab
-• "vsplit" - Opens each file in a new vertical split
-• "split" - Opens each file in a new horizontal split
-• "floating" - Opens each file in a floating window
-
-==============================================================================
-4. COMMANDS                                              *nvim-unstack-commands*
-
-                                                                  *:NvimUnstack*
-:NvimUnstack        Parse stack trace from current visual selection
-
-                                                        *:UnstackFromClipboard*
-:UnstackFromClipboard   Parse stack trace from system clipboard
-
-                                                            *:UnstackFromTmux*
-:UnstackFromTmux    Parse stack trace from tmux paste buffer
-
-                                                           *:NvimUnstackEnable*
-:NvimUnstackEnable  Enable the plugin
-
-                                                          *:NvimUnstackDisable*
-:NvimUnstackDisable Disable the plugin
-
-                                                           *:NvimUnstackToggle*
-:NvimUnstackToggle  Toggle the plugin on/off
-
-==============================================================================
-5. API                                                        *nvim-unstack-api*
-
+------------------------------------------------------------------------------
                                                            *NvimUnstack.setup()*
-NvimUnstack.setup({options})
-    Set up nvim-unstack with custom configuration.
+                         `NvimUnstack.setup`({options})
+Define your nvim-unstack setup.
 
-    Parameters: ~
-        {options} (table) Configuration options. See |NvimUnstack.options|.
+Parameters ~
+{options} `(table)` Module config table. See |NvimUnstack.options|.
 
-                                                          *NvimUnstack.unstack()*
-NvimUnstack.unstack()
-    Parse stack trace from current visual selection and open referenced files.
-
-                                               *NvimUnstack.unstack_from_clipboard()*
-NvimUnstack.unstack_from_clipboard()
-    Parse stack trace from system clipboard and open referenced files.
-
-                                                   *NvimUnstack.unstack_from_tmux()*
-NvimUnstack.unstack_from_tmux()
-    Parse stack trace from tmux paste buffer and open referenced files.
-
-                                                          *NvimUnstack.enable()*
-NvimUnstack.enable()
-    Enable the plugin and set up event listeners.
-
-                                                         *NvimUnstack.disable()*
-NvimUnstack.disable()
-    Disable the plugin and clean up resources.
-
-                                                          *NvimUnstack.toggle()*
-NvimUnstack.toggle()
-    Toggle the plugin state between enabled and disabled.
-
-==============================================================================
-6. SUPPORTED LANGUAGES                               *nvim-unstack-languages*
-
-nvim-unstack includes built-in parsers for:
-
-• Python - Standard Python tracebacks with file paths and line numbers
-• Node.js - JavaScript stack traces with file locations
-• Ruby - Ruby exception backtraces  
-• Go - Go panic stack traces and error messages
-• C# - .NET exception stack traces
-• Perl - Perl error messages with file references
-• GDB/LLDB - Debugger stack traces and breakpoint information
-
-New language parsers can be easily added by creating custom regex patterns
-and format functions. See the source code for examples.
+Usage ~
+`require("nvim-unstack").setup()` (add `{}` with your |NvimUnstack.options| table)
 
 
  vim:tw=78:ts=8:noet:ft=help:norl:

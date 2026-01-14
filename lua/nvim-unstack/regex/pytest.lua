@@ -11,6 +11,7 @@ pytest.regex = vim.regex([[\v(^\s*\S+\.py:\d+:|^FAILED \S+\.py)]])
 ---@param lines table: all lines for multiline parsing
 ---@param index number: current line index
 ---@return table
+---@private
 function pytest.format_match(line, lines, index)
     -- Match patterns like:
     -- tests/test_example.py:42: AssertionError
