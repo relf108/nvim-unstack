@@ -125,6 +125,17 @@ Plug 'relf108/nvim-unstack'
 		mapkey = "<leader>s", -- set keybinding (default)
 	},
 }
+-- Lazy load on invocation
+{
+	"relf108/nvim-unstack",
+	version = "*",
+	lazy = true,
+	cmd = "NvimUnstack",
+	keys = { { "<leader>ct", "<cmd>NvimUnstack<cr>", mode = { "v" } } },
+	opts = {
+		mapkey = false, -- Skip mapping during setup so it doesn't conflict with `keys` config
+	},
+}
 ```
 
 </div>
