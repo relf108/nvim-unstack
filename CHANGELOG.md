@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-01-16
+
+### Added
+- Configuration tests to validate setup options
+- Debug test script for interactive test debugging
+
+### Changed
+- Improved `mapkey` configuration handling - now accepts `false` to disable default mapping
+- Moved keymap setup from plugin to init.lua for better lazy-loading support
+
+### Fixed
+- Fixed lazy loading on `:NvimUnstack` command - configuration now properly initializes
+- Configuration now correctly respects `mapkey = false` to skip default key binding
+
 ## [1.1.0] - 2026-01-14
 
 ### Added
