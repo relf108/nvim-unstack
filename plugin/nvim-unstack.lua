@@ -20,11 +20,4 @@ else
     vim.api.nvim_create_user_command("UnstackFromTmux", function()
         require("nvim-unstack").unstack_from_tmux()
     end, { desc = "Unstack traceback from tmux paste buffer" })
-
-    -- Default keymaps using configurable mapkey
-    local config = _G.NvimUnstack and _G.NvimUnstack.config
-        or require("nvim-unstack.config").options
-    vim.keymap.set("v", config.mapkey, function()
-        require("nvim-unstack").unstack()
-    end, { desc = "Unstack visual selection" })
 end

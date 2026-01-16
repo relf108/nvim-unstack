@@ -72,6 +72,13 @@ function NvimUnstack.setup(opts)
             linehl = "CursorLine",
         })
     end
+
+    -- Set up keymap using configured mapkey
+    if type(_G.NvimUnstack.config.mapkey) == "string" then
+        vim.keymap.set("v", _G.NvimUnstack.config.mapkey, function()
+            require("nvim-unstack").unstack()
+        end, { desc = "Unstack visual selection" })
+    end
 end
 
 _G.NvimUnstack = NvimUnstack

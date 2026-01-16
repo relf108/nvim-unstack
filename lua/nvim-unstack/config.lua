@@ -44,7 +44,11 @@ function NvimUnstack.defaults(options)
         "`layout` must be one of: " .. table.concat(valid_layouts, ", ")
     )
 
-    assert(type(NvimUnstack.options.mapkey) == "string", "`mapkey` must be a string.")
+    assert(
+        type(NvimUnstack.options.mapkey) == "string"
+            or type(NvimUnstack.options.mapkey) == "boolean",
+        "`mapkey` must be a string or boolean."
+    )
 
     assert(
         type(NvimUnstack.options.showsigns) == "boolean",
