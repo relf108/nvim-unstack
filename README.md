@@ -14,7 +14,7 @@
 <!--toc:end-->
 
 <p align="center">
-  <h1 align="center">nvim-unstack</h2>
+  <h1 align="center">nvim-unstack</h1>
 </p>
 
 <p align="center">
@@ -115,12 +115,15 @@ Plug 'relf108/nvim-unstack'
 { "relf108/nvim-unstack" }
 -- With configuration
 {
-  "relf108/nvim-unstack",
-  config = function()
-    require("nvim-unstack").setup({
-      -- Your configuration here
-    })
-  end
+	"relf108/nvim-unstack",
+	event = "VeryLazy", -- Enable lazy loading
+	version = "*",
+	opts = {
+		debug = false, -- Disable debug logging (default)
+		showsigns = true, -- Enable signs (default)
+		layout = "tab", -- Use tab layout (default)
+		mapkey = "<leader>s", -- set keybinding (default)
+	},
 }
 ```
 
@@ -219,22 +222,6 @@ Enable `debug = true` to see detailed logging about:
 - Which language parser was selected
 - What files and line numbers were extracted
 - Any parsing errors or warnings
-
-### Advanced Configuration
-
-<details>
-<summary>Complete configuration with all options</summary>
-
-```lua
-require("nvim-unstack").setup({
-  debug = false,
-  layout = "tab",
-  mapkey = "<leader>s",
-  showsigns = true,
-})
-```
-
-</details>
 
 ## 🧰 Commands
 
