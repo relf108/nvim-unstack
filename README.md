@@ -331,16 +331,16 @@ java.name = "Java"
 -- Regex pattern to match Java stack trace lines
 java.regex = vim.regex([[at .*(\(.*\.java:[0-9]\+\))]])
 
--- Function to extract file and line number from matched line
-function java.format_match(line, lines, index)
-    local file = line:match("%((.*)%.java:")
-    local line_num = line:match(":([0-9]+)%)")
-
-    if file and line_num then
-        return { file .. ".java", line_num }
+-- Function to extract file and line numbers from entire traceback text
+function java.extract_matches(text)
+    local matches = {}
+    
+    -- Match Java stack trace format
+    for file, line_num in text:gmatch("%((.*)%.java:([0-9]+)%)") do
+        table.insert(matches, { file .. ".java", line_num })
     end
-
-    return nil
+    
+    return matches
 end
 
 return java

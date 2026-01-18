@@ -3,21 +3,17 @@ local python = {}
 python.name = "Python"
 python.regex = vim.regex([[\v^ *File "([^"]+)"]])
 
----@param line string: language specific func to jump to traceback line.
----@param lines table: all lines for multiline parsing
----@param index number: current line index
----@return table
+---@param text string: entire traceback as single string
+---@return table: array of matches
 ---@private
-function python.format_match(line, lines, index)
-    local file = line:match([["([^"]+)"]])
-    local line_num = line:match([[line ([0-9]+)]])
-
-    -- If line number not found on current line, check next line
-    if not line_num and lines and index and lines[index + 1] then
-        line_num = lines[index + 1]:match([[e ([0-9]+)]])
+function python.extract_matches(text)
+    local matches = {}
+    -- Match Python traceback format across lines
+    -- Allow whitespace (including newlines) between components to handle line wrapping
+    for file, line_num in text:gmatch('File "([^"]+)",%s*line%s*(%d+)') do
+        table.insert(matches, { file, line_num })
     end
-
-    return { file, line_num }
+    return matches
 end
 
 return python

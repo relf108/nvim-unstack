@@ -7,14 +7,10 @@ local NvimUnstack = {}
 
 -- Parse a traceback from provided lines.
 local function parse_traceback_lines(lines, callback)
-    local status, err = pcall(function()
+    local status, _ = pcall(function()
         tracebackFiletype(lines, function(parser)
-            local matches = {}
-            for i, line in ipairs(lines) do
-                if parser.regex:match_str(line) == 0 then
-                    table.insert(matches, parser.format_match(line, lines, i))
-                end
-            end
+            local text = table.concat(lines, "\n")
+            local matches = parser.extract_matches(text)
             callback(matches)
         end)
     end)

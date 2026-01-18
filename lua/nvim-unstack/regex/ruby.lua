@@ -3,13 +3,16 @@ local ruby = {}
 ruby.name = "Ruby"
 ruby.regex = vim.regex([[\v^[ \t]*from (.+):([0-9]+):in `.*]])
 
----@param line string
----@return table
+---@param text string: entire traceback as single string
+---@return table: array of matches
 ---@private
-function ruby.format_match(line)
-    local file = line:match([[from ([^:]+):]])
-    local line_num = line:match([[:(%d+):in]])
-    return { file, line_num }
+function ruby.extract_matches(text)
+    local matches = {}
+    -- Match Ruby backtrace format
+    for file, line_num in text:gmatch("from ([^:]+):(%d+):in") do
+        table.insert(matches, { file, line_num })
+    end
+    return matches
 end
 
 return ruby

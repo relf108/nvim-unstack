@@ -317,9 +317,9 @@ T["Parser edge cases"]["Pytest parser handles colon-only lines"] = function()
 
     child.lua([[
         local pytest = require("nvim-unstack.regex.pytest")
-        local line = "tests/test_example.py:15:"
-        local match = pytest.format_match(line)
-        _G.test_match = match
+        local text = "tests/test_example.py:15:"
+        local matches = pytest.extract_matches(text)
+        _G.test_match = matches[1]
     ]])
 
     local result = child.lua_get("_G.test_match")
@@ -332,9 +332,9 @@ T["Parser edge cases"]["handles files with no line numbers gracefully"] = functi
 
     child.lua([[
         local pytest = require("nvim-unstack.regex.pytest")
-        local line = "FAILED tests/test_math.py::test_division - ZeroDivisionError"
-        local match = pytest.format_match(line)
-        _G.test_match = match
+        local text = "FAILED tests/test_math.py::test_division - ZeroDivisionError"
+        local matches = pytest.extract_matches(text)
+        _G.test_match = matches[1]
     ]])
 
     local result = child.lua_get("_G.test_match")

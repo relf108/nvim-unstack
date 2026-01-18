@@ -8,32 +8,23 @@ local pytest = {}
 pytest.name = "Pytest"
 pytest.regex = vim.regex([[\v(^\s*\S+\.py:\d+:|^FAILED \S+\.py)]])
 
----@param line string: language specific func to jump to traceback line.
----@param lines table: all lines for multiline parsing
----@param index number: current line index
----@return table
+---@param text string: entire traceback as single string
+---@return table: array of matches
 ---@private
-function pytest.format_match(line, lines, index)
-    -- Match patterns like:
-    -- tests/test_example.py:42: AssertionError
-    -- src/calculator.py:8: ZeroDivisionError
-    -- tests/test_math.py:15:
-    local file, line_num = line:match([[([^:%s]+%.py):(%d+):]])
+function pytest.extract_matches(text)
+    local matches = {}
 
-    if file and line_num then
-        return { file, line_num }
+    -- Match pytest output lines like: tests/test_example.py:42: AssertionError
+    for file, line_num in text:gmatch("(%S+%.py):(%d+):") do
+        table.insert(matches, { file, line_num })
     end
 
-    -- Match FAILED lines like:
-    -- FAILED tests/test_math.py::test_division - ZeroDivisionError
-    file = line:match([[FAILED ([^:]+%.py)]])
-    if file then
-        -- Extract just the file path, removing test name
-        file = file:match([[([^:]+%.py)]])
-        return { file, nil }
+    -- Match FAILED lines like: FAILED tests/test_math.py::test_division
+    for file in text:gmatch("FAILED ([^:]+%.py)") do
+        table.insert(matches, { file, nil })
     end
 
-    return { nil, nil }
+    return matches
 end
 
 return pytest
