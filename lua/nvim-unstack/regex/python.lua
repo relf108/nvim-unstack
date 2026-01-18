@@ -1,5 +1,6 @@
 local python = {}
 
+python.name = "Python"
 python.regex = vim.regex([[\v^ *File "([^"]+)"]])
 
 ---@param line string: language specific func to jump to traceback line.

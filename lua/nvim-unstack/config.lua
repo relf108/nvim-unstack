@@ -19,6 +19,13 @@ NvimUnstack.options = {
 
     -- Show signs on lines from stack trace
     showsigns = true,
+
+    -- Local files only # TODO
+    localfilesonly = true,
+
+    -- Return first parser match
+    -- Disable to get popup for available parsers (useful for python and pytest)
+    usefirstparser = true,
 }
 
 ---@private
@@ -53,6 +60,11 @@ function NvimUnstack.defaults(options)
     assert(
         type(NvimUnstack.options.showsigns) == "boolean",
         "`showsigns` must be a boolean (`true` or `false`)."
+    )
+
+    assert(
+        type(NvimUnstack.options.usefirstparser) == "boolean",
+        "`usefirstparser` must be a boolean (`true` or `false`)."
     )
 
     return NvimUnstack.options

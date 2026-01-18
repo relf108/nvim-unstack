@@ -5,6 +5,7 @@ local pytest = {}
 -- tests/test_example.py:15:
 -- src/calculator.py:8: ZeroDivisionError
 -- FAILED tests/test_math.py::test_division - ZeroDivisionError
+pytest.name = "Pytest"
 pytest.regex = vim.regex([[\v(^\s*\S+\.py:\d+:|^FAILED \S+\.py)]])
 
 ---@param line string: language specific func to jump to traceback line.

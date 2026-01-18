@@ -1,5 +1,6 @@
 local csharp = {}
 
+csharp.name = "C#"
 csharp.regex = vim.regex([[\v^[ \t]*at .*\(.*\) in (.+):line ([0-9]+) *$]])
 
 ---@param line string

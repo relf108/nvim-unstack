@@ -1,5 +1,6 @@
 local nodejs = {}
 
+nodejs.name = "Node.js"
 nodejs.regex = vim.regex([[\v^ +at .+\((.+):(\d+):\d+\)$]])
 
 ---@param line string

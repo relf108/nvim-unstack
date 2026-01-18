@@ -1,5 +1,6 @@
 local gdb_lldb = {}
 
+gdb_lldb.name = "GDB/LLDB"
 gdb_lldb.regex = vim.regex([[\v^[ *]*%(frame )?#\d+:? +0[xX][0-9a-fA-F]+ .+ at (.+):(\d+)]])
 
 ---@param line string

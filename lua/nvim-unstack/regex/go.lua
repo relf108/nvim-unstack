@@ -1,5 +1,6 @@
 local go = {}
 
+go.name = "Go"
 go.regex = vim.regex([[\v^[ \t]*(.+):(\d+) \+0x\x+$]])
 
 ---@param line string

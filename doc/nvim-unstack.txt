@@ -18,6 +18,13 @@ Default values:
 
       -- Show signs on lines from stack trace
       showsigns = true,
+
+      -- Local files only # TODO
+      localfilesonly = true,
+
+      -- Return first parser match
+      -- Disable to get popup for available parsers (useful for python and pytest)
+      usefirstparser = true,
   }
 
 <

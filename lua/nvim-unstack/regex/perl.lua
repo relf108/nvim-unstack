@@ -1,5 +1,6 @@
 local perl = {}
 
+perl.name = "Perl"
 perl.regex = vim.regex([[\v^[ \t]*at (.+) line (\d+)]])
 
 ---@param line string

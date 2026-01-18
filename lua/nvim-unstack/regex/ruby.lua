@@ -1,5 +1,6 @@
 local ruby = {}
 
+ruby.name = "Ruby"
 ruby.regex = vim.regex([[\v^[ \t]*from (.+):([0-9]+):in `.*]])
 
 ---@param line string
