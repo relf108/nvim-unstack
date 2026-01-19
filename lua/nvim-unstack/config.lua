@@ -20,8 +20,20 @@ NvimUnstack.options = {
     -- Show signs on lines from stack trace
     showsigns = true,
 
-    -- Local files only # TODO
-    localfilesonly = true,
+    -- Exclude file paths matching these patterns from stack traces
+    -- Set to false to disable filtering, or provide a table of patterns to match
+    -- Patterns are matched against the absolute file path
+    exclude_patterns = {
+        "node_modules", -- JavaScript/TypeScript dependencies
+        ".venv", -- Python virtual environment
+        "venv", -- Python virtual environment (alternate name)
+        "site%-packages", -- Python installed packages
+        "dist%-packages", -- Python system packages
+        "/usr/", -- System libraries (Unix)
+        "/lib/", -- System libraries
+        "%.cargo/", -- Rust dependencies
+        "vendor/", -- Ruby/Go dependencies
+    },
 
     -- Return first parser match
     -- Disable to get popup for available parsers (useful for python and pytest)
@@ -66,9 +78,11 @@ function NvimUnstack.defaults(options)
         type(NvimUnstack.options.usefirstparser) == "boolean",
         "`usefirstparser` must be a boolean (`true` or `false`)."
     )
+
     assert(
-        type(NvimUnstack.options.localfilesonly) == "boolean",
-        "`localfilesonly` must be a boolean (`true` or `false`)."
+        type(NvimUnstack.options.exclude_patterns) == "table"
+            or NvimUnstack.options.exclude_patterns == false,
+        "`exclude_patterns` must be a table of patterns or false to disable."
     )
 
     return NvimUnstack.options

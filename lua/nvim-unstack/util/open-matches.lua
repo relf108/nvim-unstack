@@ -111,6 +111,29 @@ return function(matches)
         return
     end
 
+    if config.exclude_patterns and type(config.exclude_patterns) == "table" then
+        local validated_matches = {}
+        for _, match in ipairs(matches) do
+            local file, line_num = match[1], match[2]
+            -- Resolve to absolute path
+            local abs_file = vim.fn.fnamemodify(file, ":p")
+
+            -- Check if file matches any exclude pattern
+            local should_exclude = false
+            for _, pattern in ipairs(config.exclude_patterns) do
+                if abs_file:find(pattern) then
+                    should_exclude = true
+                    break
+                end
+            end
+
+            if not should_exclude then
+                table.insert(validated_matches, { file, line_num })
+            end
+        end
+        matches = validated_matches
+    end
+
     local handler = layout_handlers[config.layout]
     if handler then
         handler(matches, config)
