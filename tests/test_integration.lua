@@ -84,7 +84,7 @@ T["Layouts"]["validates layout option"] = function()
 end
 
 T["Layouts"]["accepts valid layouts"] = function()
-    local layouts = { "tab", "vsplit", "split", "floating" }
+    local layouts = { "tab", "vsplit", "split", "floating", "quickfix_list" }
 
     for _, layout in ipairs(layouts) do
         child.restart({ "-u", "scripts/minimal_init.lua" })
@@ -102,6 +102,46 @@ T["Layouts"]["accepts valid layouts"] = function()
         local status = child.lua_get("_G.test_result")
         MiniTest.expect.equality(status, true)
     end
+end
+
+T["Layouts"]["quickfix_list populates quickfix list correctly"] = function()
+    child.lua([[require('nvim-unstack').setup({ layout = "quickfix_list" })]])
+
+    child.lua([[
+        -- Create test matches
+        local matches = {
+            { "test_file1.py", "10" },
+            { "test_file2.py", "20" },
+            { "test_file3.py", "30" },
+        }
+        
+        -- Call open_matches directly with the matches
+        local open_matches = require('nvim-unstack.util.open-matches')
+        open_matches(matches)
+        
+        -- Get the quickfix list
+        local qf_list = vim.fn.getqflist()
+        
+        _G.test_qf_count = #qf_list
+        _G.test_qf_items = {}
+        for i, item in ipairs(qf_list) do
+            _G.test_qf_items[i] = {
+                filename = vim.fn.bufname(item.bufnr),
+                lnum = item.lnum
+            }
+        end
+    ]])
+
+    local qf_count = child.lua_get("_G.test_qf_count")
+    MiniTest.expect.equality(qf_count, 3)
+
+    local qf_items = child.lua_get("_G.test_qf_items")
+    MiniTest.expect.equality(qf_items[1].filename, "test_file1.py")
+    MiniTest.expect.equality(qf_items[1].lnum, 10)
+    MiniTest.expect.equality(qf_items[2].filename, "test_file2.py")
+    MiniTest.expect.equality(qf_items[2].lnum, 20)
+    MiniTest.expect.equality(qf_items[3].filename, "test_file3.py")
+    MiniTest.expect.equality(qf_items[3].lnum, 30)
 end
 
 -- Tests for clipboard functionality

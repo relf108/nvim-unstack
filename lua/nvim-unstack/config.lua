@@ -45,7 +45,7 @@ function NvimUnstack.defaults(options)
         "`debug` must be a boolean (`true` or `false`)."
     )
 
-    local valid_layouts = { "vsplit", "split", "tab", "floating" }
+    local valid_layouts = { "vsplit", "split", "tab", "floating", "quickfix_list" }
     assert(
         vim.tbl_contains(valid_layouts, NvimUnstack.options.layout),
         "`layout` must be one of: " .. table.concat(valid_layouts, ", ")
@@ -65,6 +65,10 @@ function NvimUnstack.defaults(options)
     assert(
         type(NvimUnstack.options.usefirstparser) == "boolean",
         "`usefirstparser` must be a boolean (`true` or `false`)."
+    )
+    assert(
+        type(NvimUnstack.options.localfilesonly) == "boolean",
+        "`localfilesonly` must be a boolean (`true` or `false`)."
     )
 
     return NvimUnstack.options
