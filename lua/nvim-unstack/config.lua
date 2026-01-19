@@ -37,7 +37,7 @@ NvimUnstack.options = {
 
     -- Return first parser match
     -- Disable to get popup for available parsers (useful for python and pytest)
-    usefirstparser = true,
+    use_first_parser = true,
 }
 
 ---@private
@@ -75,8 +75,8 @@ function NvimUnstack.defaults(options)
     )
 
     assert(
-        type(NvimUnstack.options.usefirstparser) == "boolean",
-        "`usefirstparser` must be a boolean (`true` or `false`)."
+        type(NvimUnstack.options.use_first_parser) == "boolean",
+        "`use_first_parser` must be a boolean (`true` or `false`)."
     )
 
     assert(

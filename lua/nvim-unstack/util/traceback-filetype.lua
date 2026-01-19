@@ -31,7 +31,7 @@ return function(selection, callback)
     for _, v_parser in ipairs(validated_parsers) do
         for _, line in ipairs(selection) do
             if v_parser.regex:match_str(line) == 0 then
-                if _G.NvimUnstack.config.usefirstparser then
+                if _G.NvimUnstack.config.use_first_parser then
                     return v_parser
                 end
 

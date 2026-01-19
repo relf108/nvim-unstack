@@ -214,7 +214,7 @@ require("nvim-unstack").setup({
 
   -- Use first matching parser (default: true)
   -- When false, shows a selection prompt if multiple parsers match
-  usefirstparser = true,
+  use_first_parser = true,
 })
 ```
 
@@ -229,7 +229,7 @@ require("nvim-unstack").setup({
 
 #### Multiple Parser Matching
 
-The `usefirstparser` option controls behavior when multiple parsers can parse the same stack trace:
+The `use_first_parser` option controls behavior when multiple parsers can parse the same stack trace:
 
 - **`true`** (default): Automatically uses the first matching parser
 - **`false`**: Shows a selection prompt with parser names (e.g., "Python", "Pytest", "Node.js")
@@ -346,7 +346,7 @@ end
 return java
 ```
 
-**Note:** The `name` field is required for displaying the parser in the selection prompt when `usefirstparser = false`.
+**Note:** The `name` field is required for displaying the parser in the selection prompt when `use_first_parser = false`.
 
 ### Custom Layout Configurations
 

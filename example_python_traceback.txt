@@ -1,0 +1,61 @@
+Traceback (most recent call last):
+  File "/home/developer/my_project/main.py", line 47, in <module>
+    app.run()
+  File "/home/developer/my_project/app.py", line 156, in run
+    self.process_data()
+  File "/home/developer/my_project/app.py", line 134, in process_data
+    result = self.analyzer.analyze(self.data)
+  File "/home/developer/my_project/analyzers/sentiment_analyzer.py", line 89, in analyze
+    tokens = self.tokenizer.tokenize(text)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/nlp_toolkit/tokenizer.py", line 234, in tokenize
+    return self._split_with_regex(text, self.pattern)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/nlp_toolkit/tokenizer.py", line 198, in _split_with_regex
+    matches = regex.findall(pattern, text, timeout=self.timeout)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/regex/regex.py", line 743, in findall
+    return _cache[key].findall(string, pos, endpos, concurrent, timeout)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/regex/_regex_core.py", line 569, in findall
+    result = self._search_all(string, pos, endpos, concurrent, timeout)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/regex/_regex_core.py", line 512, in _search_all
+    m = self.search(string, pos, endpos, concurrent, partial, timeout)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/regex/_regex_core.py", line 421, in search
+    return _compile(self, concurrent, locale, flags, kwargs).search(
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/regex/implementations/default.py", line 887, in search
+    state = self._create_state(string, pos, endpos, flags, partial)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/regex/implementations/default.py", line 756, in _create_state
+    return State(string, pos, endpos, self._regex, flags, partial)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/regex/implementations/state.py", line 145, in __init__
+    self.string_buffer = self._prepare_string(string)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/regex/implementations/state.py", line 203, in _prepare_string
+    normalized = self._normalizer.normalize(string)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/text_normalizer/core.py", line 312, in normalize
+    return self._apply_rules(text, self.rules)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/text_normalizer/core.py", line 278, in _apply_rules
+    text = rule.apply(text, context=self.context)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/text_normalizer/rules/unicode_rule.py", line 67, in apply
+    return self._unicode_transform(text, self.transformation_table)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/text_normalizer/rules/unicode_rule.py", line 45, in _unicode_transform
+    char_data = self.table[ord(char)]
+KeyError: 128512
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/developer/my_project/main.py", line 53, in <module>
+    logging.error(f"Application failed: {e}")
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/loguru/_logger.py", line 1847, in error
+    self._log("ERROR", False, self._options, message, args, kwargs)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/loguru/_logger.py", line 1432, in _log
+    handler.emit(record)
+  File "/home/developer/my_project/.venv/lib/python3.11/site-packages/loguru/_handler.py", line 234, in emit
+    self._sink.write(formatted)
+  File "/home/developer/my_project/utils/custom_sink.py", line 78, in write
+    self._rotate_if_needed()
+  File "/home/developer/my_project/utils/custom_sink.py", line 92, in _rotate_if_needed
+    self._compress_old_logs()
+  File "/home/developer/my_project/utils/custom_sink.py", line 115, in _compress_old_logs
+    with gzip.open(output_path, 'wb') as f_out:
+  File "/usr/lib/python3.11/gzip.py", line 58, in open
+    binary_file = GzipFile(filename, gz_mode, compresslevel, fileobj)
+  File "/usr/lib/python3.11/gzip.py", line 173, in __init__
+    self.fileobj = self.myfileobj = builtins.open(filename, mode or 'rb')
+PermissionError: [Errno 13] Permission denied: '/var/log/my_project/archive/app_2026-01-19.log.gz'

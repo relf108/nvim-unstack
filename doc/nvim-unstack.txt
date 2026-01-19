@@ -24,19 +24,19 @@ Default values:
       -- Patterns are matched against the absolute file path
       exclude_patterns = {
           "node_modules", -- JavaScript/TypeScript dependencies
-          ".venv",        -- Python virtual environment
-          "venv",         -- Python virtual environment (alternate name)
+          ".venv", -- Python virtual environment
+          "venv", -- Python virtual environment (alternate name)
           "site%-packages", -- Python installed packages
           "dist%-packages", -- Python system packages
-          "/usr/",        -- System libraries (Unix)
-          "/lib/",        -- System libraries
-          "%.cargo/",     -- Rust dependencies
-          "vendor/",      -- Ruby/Go dependencies
+          "/usr/", -- System libraries (Unix)
+          "/lib/", -- System libraries
+          "%.cargo/", -- Rust dependencies
+          "vendor/", -- Ruby/Go dependencies
       },
 
       -- Return first parser match
       -- Disable to get popup for available parsers (useful for python and pytest)
-      usefirstparser = true,
+      use_first_parser = true,
   }
 
 <
