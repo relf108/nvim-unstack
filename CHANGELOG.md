@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-01-20
+
+### Added
+- Popup selection menu when multiple parsers match a stack trace
+- `quickfix_list` layout option for opening traces in quickfix window
+- `exclude_patterns` configuration option with sensible defaults to filter out common noise
+- Line wrapping handling by concatenating tracebacks as single string
+
+### Changed
+- Documented new `use_first_parser` config option for parser selection behavior
+- Updated license with contributor name
+
+### Fixed
+- `use_first_parser=true` no longer breaks filetype detection
+- Pytest FAIL line now defaults to 1 when nil
+
 ## [1.2.0] - 2026-01-16
 
 ### Added
