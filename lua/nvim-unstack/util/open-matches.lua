@@ -107,10 +107,6 @@ local layout_handlers = {
 return function(matches)
     local config = _G.NvimUnstack.config or require("nvim-unstack.config").options
 
-    if #matches == 0 then
-        return
-    end
-
     if config.exclude_patterns and type(config.exclude_patterns) == "table" then
         local validated_matches = {}
         for _, match in ipairs(matches) do
@@ -132,6 +128,10 @@ return function(matches)
             end
         end
         matches = validated_matches
+    end
+
+    if #matches == 0 then
+        return
     end
 
     local handler = layout_handlers[config.layout]

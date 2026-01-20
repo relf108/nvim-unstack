@@ -385,7 +385,7 @@ T["Parser edge cases"]["handles files with no line numbers gracefully"] = functi
     local result = child.lua_get("_G.test_match")
     MiniTest.expect.equality(result[1], "tests/test_math.py")
     -- Line number should default to 1
-    MiniTest.expect.equality(result[2], 1)
+    MiniTest.expect.equality(result[2], "1")
 end
 
 return T

@@ -29,7 +29,7 @@
 
 - **Multi-language support**: Built-in regex parsers for Python, Node.js, Ruby, Go, C#, Perl, and GDB/LLDB
 - **Smart parser selection**: Automatically detects the right parser, or lets you choose when multiple match
-- **Flexible layouts**: Open files in tabs, vertical splits, horizontal splits, or floating windows
+- **Flexible layouts**: Open files in tabs, vertical splits, horizontal splits, floating windows, or quickfix list
 - **Visual indicators**: Optional signs to highlight stack trace lines
 - **Multiple input methods**: Parse from visual selection, clipboard, or tmux paste buffer
 - **Configurable keymaps**: Customize the key binding for stack trace parsing
@@ -124,6 +124,18 @@ Plug 'relf108/nvim-unstack'
 		showsigns = true, -- Enable signs (default)
 		layout = "tab", -- Use tab layout (default)
 		mapkey = "<leader>s", -- set keybinding (default)
+		use_first_parser = true, -- Use first matching parser (default)
+		exclude_patterns = { -- Filter out dependencies (default includes common paths)
+              "node_modules", -- JavaScript/TypeScript dependencies
+              ".venv", -- Python virtual environment
+              "venv", -- Python virtual environment (alternate name)
+              "site%-packages", -- Python installed packages
+              "dist%-packages", -- Python system packages
+              "/usr/", -- System libraries (Unix)
+              "/lib/", -- System libraries
+              "%.cargo/", -- Rust dependencies
+              "vendor/", -- Ruby/Go dependencies
+		},
 	},
 }
 -- Lazy load on invocation
@@ -203,7 +215,7 @@ require("nvim-unstack").setup({
   debug = false,
 
   -- Layout for opening files (default: "tab")
-  -- Options: "tab", "vsplit", "split", "floating"
+  -- Options: "tab", "vsplit", "split", "floating", "quickfix_list"
   layout = "tab",
 
   -- Key mapping for visual selection unstacking (default: "<leader>s")
@@ -215,6 +227,21 @@ require("nvim-unstack").setup({
   -- Use first matching parser (default: true)
   -- When false, shows a selection prompt if multiple parsers match
   use_first_parser = true,
+
+  -- Exclude file paths matching these patterns from stack traces
+  -- Set to false to disable filtering, or provide a table of patterns
+  -- Patterns are matched against the absolute file path
+  exclude_patterns = {
+    "node_modules",     -- JavaScript/TypeScript dependencies
+    ".venv",            -- Python virtual environment
+    "venv",             -- Python virtual environment (alternate name)
+    "site%-packages",   -- Python installed packages
+    "dist%-packages",   -- Python system packages
+    "/usr/",            -- System libraries (Unix)
+    "/lib/",            -- System libraries
+    "%.cargo/",         -- Rust dependencies
+    "vendor/",          -- Ruby/Go dependencies
+  },
 })
 ```
 
@@ -226,6 +253,35 @@ require("nvim-unstack").setup({
 - **`"vsplit"`**: Opens each file in a new vertical split
 - **`"split"`**: Opens each file in a new horizontal split
 - **`"floating"`**: Opens each file in a floating window
+- **`"quickfix_list"`**: Populates the quickfix list with all stack trace entries
+
+#### Exclude Patterns
+
+The `exclude_patterns` option filters out unwanted files from stack traces, particularly useful for hiding third-party dependencies and system libraries:
+
+- **`table`** (default): List of Lua patterns to match against absolute file paths
+- **`false`**: Disable filtering entirely (show all files from stack trace)
+
+Common patterns included by default:
+
+- `node_modules` - JavaScript/TypeScript dependencies
+- `.venv`, `venv` - Python virtual environments
+- `site%-packages`, `dist%-packages` - Python installed packages
+- `/usr/`, `/lib/` - System libraries
+- `%.cargo/` - Rust dependencies
+- `vendor/` - Ruby/Go dependencies
+
+You can customize this list to match your project needs:
+
+```lua
+require("nvim-unstack").setup({
+  -- Only exclude node_modules
+  exclude_patterns = { "node_modules" },
+
+  -- Or disable filtering completely
+  exclude_patterns = false,
+})
+```
 
 #### Multiple Parser Matching
 
@@ -334,12 +390,12 @@ java.regex = vim.regex([[at .*(\(.*\.java:[0-9]\+\))]])
 -- Function to extract file and line numbers from entire traceback text
 function java.extract_matches(text)
     local matches = {}
-    
+
     -- Match Java stack trace format
     for file, line_num in text:gmatch("%((.*)%.java:([0-9]+)%)") do
         table.insert(matches, { file .. ".java", line_num })
     end
-    
+
     return matches
 end
 

@@ -21,8 +21,11 @@ function pytest.extract_matches(text)
 
     -- Match FAILED lines like: FAILED tests/test_math.py::test_division
     for file in text:gmatch("FAILED ([^:]+%.py)") do
-        -- Default to line 1 for these matches as they don't have a line number
-        table.insert(matches, { file, 1 })
+        -- FAILED summary lines don't include a line number; we still want a
+        -- clickable location in the file, so we default to line 1 as a
+        -- deterministic, safe choice. This may not be the exact failure line,
+        -- but it's preferable to having no jump target at all.
+        table.insert(matches, { file, "1" })
     end
 
     return matches
