@@ -28,8 +28,9 @@ Traceback (most recent call last):\n\
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
-        _G.test_result = parser ~= nil and type(parser.regex) == "userdata"
+        tracebackFiletype(lines, function(parser)
+            _G.test_result = parser ~= nil and type(parser.regex) == "userdata"
+        end)
     ]=])
 
     local result = child.lua_get("_G.test_result")
@@ -41,14 +42,68 @@ T["Python parser"]["extracts file and line number"] = function()
 
     child.lua([[
         local python = require("nvim-unstack.regex.python")
-        local line = '  File "/path/to/myproject/main.py", line 42, in main'
-        local match = python.format_match(line)
-        _G.test_match = match
+        local text = '  File "/path/to/myproject/main.py", line 42, in main'
+        local matches = python.extract_matches(text)
+        _G.test_match = matches[1]
     ]])
 
     local result = child.lua_get("_G.test_match")
     MiniTest.expect.equality(result[1], "/path/to/myproject/main.py")
     MiniTest.expect.equality(result[2], "42")
+end
+
+T["Python parser"]["handles line-wrapped tracebacks"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local python = require("nvim-unstack.regex.python")
+        local text = '  File "/some/very/long/path/to/project/directory/with/nested/folders/module.py", line 123, in some_very_long_function_name\n    some_code_that_caused_error()'
+        local matches = python.extract_matches(text)
+        _G.test_match = matches[1]
+    ]])
+
+    local result = child.lua_get("_G.test_match")
+    MiniTest.expect.equality(
+        result[1],
+        "/some/very/long/path/to/project/directory/with/nested/folders/module.py"
+    )
+    MiniTest.expect.equality(result[2], "123")
+end
+
+T["Python parser"]["handles filename wrapping over two lines"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local python = require("nvim-unstack.regex.python")
+        -- When filename has a literal newline in the quoted string, parser should match
+        local text = '  File "/home/user/very/long/path/that/continues/\nto/another/line/file.py", line 456, in function_name'
+        local matches = python.extract_matches(text)
+        _G.test_match = matches[1]
+    ]])
+
+    local result = child.lua_get("_G.test_match")
+    MiniTest.expect.equality(
+        result[1],
+        "/home/user/very/long/path/that/continues/\nto/another/line/file.py"
+    )
+    MiniTest.expect.equality(result[2], "456")
+end
+
+T["Python parser"]["handles filename and line number over two lines"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local python = require("nvim-unstack.regex.python")
+        -- When line number has whitespace/newline before it, parser should now match
+        local text = '  File "/home/user/project/src/components/utils/helpers.py", line \n789, in helper_function'
+        local matches = python.extract_matches(text)
+        _G.test_match = matches[1]
+    ]])
+
+    local result = child.lua_get("_G.test_match")
+    -- The pattern now uses %s* to match whitespace including newlines
+    MiniTest.expect.equality(result[1], "/home/user/project/src/components/utils/helpers.py")
+    MiniTest.expect.equality(result[2], "789")
 end
 
 -- Tests for Pytest parser
@@ -70,8 +125,9 @@ T["Pytest parser"]["parses pytest failure output"] = function()
         }
         
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         _G.test_result = parser ~= nil
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -83,9 +139,9 @@ T["Pytest parser"]["extracts file and line from pytest output"] = function()
 
     child.lua([[
         local pytest = require("nvim-unstack.regex.pytest")
-        local line = "tests/test_example.py:42: AssertionError"
-        local match = pytest.format_match(line)
-        _G.test_match = match
+        local text = "tests/test_example.py:42: AssertionError"
+        local matches = pytest.extract_matches(text)
+        _G.test_match = matches[1]
     ]])
 
     local result = child.lua_get("_G.test_match")
@@ -98,9 +154,9 @@ T["Pytest parser"]["handles FAILED lines"] = function()
 
     child.lua([[
         local pytest = require("nvim-unstack.regex.pytest")
-        local line = "FAILED tests/test_math.py::test_division - ZeroDivisionError"
-        local match = pytest.format_match(line)
-        _G.test_match = match
+        local text = "FAILED tests/test_math.py::test_division - ZeroDivisionError"
+        local matches = pytest.extract_matches(text)
+        _G.test_match = matches[1]
     ]])
 
     local result = child.lua_get("_G.test_match")
@@ -121,8 +177,9 @@ T["Node.js parser"]["parses Node.js stack trace"] = function()
         }
 
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         _G.test_result = parser ~= nil
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -134,9 +191,9 @@ T["Node.js parser"]["extracts file and line number"] = function()
 
     child.lua([[
         local nodejs = require("nvim-unstack.regex.nodejs")
-        local line = "    at processData (/home/user/project/src/processor.js:15:10)"
-        local match = nodejs.format_match(line)
-        _G.test_match = match
+        local text = "    at processData (/home/user/project/src/processor.js:15:10)"
+        local matches = nodejs.extract_matches(text)
+        _G.test_match = matches[1]
     ]])
 
     local result = child.lua_get("_G.test_match")
@@ -158,8 +215,9 @@ T["Ruby parser"]["parses Ruby backtrace"] = function()
         }
 
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         _G.test_result = parser ~= nil
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -171,9 +229,9 @@ T["Ruby parser"]["extracts file and line number"] = function()
 
     child.lua([[
         local ruby = require("nvim-unstack.regex.ruby")
-        local line = "\tfrom /home/user/app/main.rb:42:in `main'"
-        local match = ruby.format_match(line)
-        _G.test_match = match
+        local text = "\tfrom /home/user/app/main.rb:42:in `main'"
+        local matches = ruby.extract_matches(text)
+        _G.test_match = matches[1]
     ]])
 
     local result = child.lua_get("_G.test_match")
@@ -199,8 +257,9 @@ T["Go parser"]["parses Go panic stack trace"] = function()
         }
 
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         _G.test_result = parser ~= nil
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -212,9 +271,9 @@ T["Go parser"]["extracts file and line number"] = function()
 
     child.lua([[
         local go = require("nvim-unstack.regex.go")
-        local line = "\t/home/user/project/processor.go:15 +0x50"
-        local match = go.format_match(line)
-        _G.test_match = match
+        local text = "\t/home/user/project/processor.go:15 +0x50"
+        local matches = go.extract_matches(text)
+        _G.test_match = matches[1]
     ]])
 
     local result = child.lua_get("_G.test_match")
@@ -241,16 +300,12 @@ T["Multiple matches"]["extracts all Python matches from traceback"] = function()
         }
 
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
-        local matches = {}
-        
-        for i, line in ipairs(lines) do
-            if parser.regex:match_str(line) == 0 then
-                table.insert(matches, parser.format_match(line, lines, i))
-            end
-        end
+        tracebackFiletype(lines, function(parser)
+        local text = table.concat(lines, "\n")
+        local matches = parser.extract_matches(text)
         
         _G.test_count = #matches
+        end)
     ]])
 
     local count = child.lua_get("_G.test_count")
@@ -269,16 +324,12 @@ T["Multiple matches"]["extracts all Node.js matches from traceback"] = function(
         }
 
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
-        local matches = {}
-        
-        for i, line in ipairs(lines) do
-            if parser.regex:match_str(line) == 0 then
-                table.insert(matches, parser.format_match(line, lines, i))
-            end
-        end
+        tracebackFiletype(lines, function(parser)
+        local text = table.concat(lines, "\n")
+        local matches = parser.extract_matches(text)
         
         _G.test_count = #matches
+        end)
     ]])
 
     local count = child.lua_get("_G.test_count")

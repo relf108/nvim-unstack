@@ -19,6 +19,25 @@ NvimUnstack.options = {
 
     -- Show signs on lines from stack trace
     showsigns = true,
+
+    -- Exclude file paths matching these patterns from stack traces
+    -- Set to false to disable filtering, or provide a table of patterns to match
+    -- Patterns are matched against the absolute file path
+    exclude_patterns = {
+        "node_modules", -- JavaScript/TypeScript dependencies
+        ".venv", -- Python virtual environment
+        "venv", -- Python virtual environment (alternate name)
+        "site%-packages", -- Python installed packages
+        "dist%-packages", -- Python system packages
+        "/usr/", -- System libraries (Unix)
+        "/lib/", -- System libraries
+        "%.cargo/", -- Rust dependencies
+        "vendor/", -- Ruby/Go dependencies
+    },
+
+    -- Return first parser match
+    -- Disable to get popup for available parsers (useful for python and pytest)
+    use_first_parser = true,
 }
 
 ---@private
@@ -38,7 +57,7 @@ function NvimUnstack.defaults(options)
         "`debug` must be a boolean (`true` or `false`)."
     )
 
-    local valid_layouts = { "vsplit", "split", "tab", "floating" }
+    local valid_layouts = { "vsplit", "split", "tab", "floating", "quickfix_list" }
     assert(
         vim.tbl_contains(valid_layouts, NvimUnstack.options.layout),
         "`layout` must be one of: " .. table.concat(valid_layouts, ", ")
@@ -53,6 +72,17 @@ function NvimUnstack.defaults(options)
     assert(
         type(NvimUnstack.options.showsigns) == "boolean",
         "`showsigns` must be a boolean (`true` or `false`)."
+    )
+
+    assert(
+        type(NvimUnstack.options.use_first_parser) == "boolean",
+        "`use_first_parser` must be a boolean (`true` or `false`)."
+    )
+
+    assert(
+        type(NvimUnstack.options.exclude_patterns) == "table"
+            or NvimUnstack.options.exclude_patterns == false,
+        "`exclude_patterns` must be a table of patterns or false to disable."
     )
 
     return NvimUnstack.options

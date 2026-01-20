@@ -6,32 +6,27 @@ local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
 local NvimUnstack = {}
 
 -- Parse a traceback from provided lines.
-local function parse_traceback_lines(lines)
-    local matches = {}
-
-    local status, parser = pcall(function()
-        return tracebackFiletype(lines)
+local function parse_traceback_lines(lines, callback)
+    local status, _ = pcall(function()
+        tracebackFiletype(lines, function(parser)
+            local text = table.concat(lines, "\n")
+            local matches = parser.extract_matches(text)
+            callback(matches)
+        end)
     end)
 
     if not status then
         vim.notify("No traceback parsers found.", vim.log.levels.ERROR)
-        return {}
+        callback({})
     end
-
-    for i, line in ipairs(lines) do
-        if parser.regex:match_str(line) == 0 then
-            table.insert(matches, parser.format_match(line, lines, i))
-        end
-    end
-
-    return matches
 end
 
 -- Parse a visually selected traceback.
 function NvimUnstack.unstack()
     local selection = getVisualSelection()
-    local matches = parse_traceback_lines(selection)
-    openMatches(matches)
+    parse_traceback_lines(selection, function(matches)
+        openMatches(matches)
+    end)
 end
 
 -- Parse traceback from system clipboard
@@ -43,8 +38,9 @@ function NvimUnstack.unstack_from_clipboard()
     end
 
     local lines = vim.split(clipboard_content, "\n")
-    local matches = parse_traceback_lines(lines)
-    openMatches(matches)
+    parse_traceback_lines(lines, function(matches)
+        openMatches(matches)
+    end)
 end
 
 -- Parse traceback from tmux paste buffer
@@ -56,8 +52,9 @@ function NvimUnstack.unstack_from_tmux()
     end
 
     local lines = vim.split(tmux_content, "\n")
-    local matches = parse_traceback_lines(lines)
-    openMatches(matches)
+    parse_traceback_lines(lines, function(matches)
+        openMatches(matches)
+    end)
 end
 
 -- setup NvimUnstack options and merge them with user provided ones.

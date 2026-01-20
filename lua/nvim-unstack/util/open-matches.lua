@@ -1,21 +1,18 @@
 -- Open matched files from stack trace.
 
----@param matches table: the file path to jump to.
----@private
-return function(matches)
-    local config = _G.NvimUnstack.config or require("nvim-unstack.config").options
-
-    if #matches == 0 then
-        return
+local function place_sign(config, buf, line_num)
+    if config.showsigns then
+        vim.fn.sign_place(0, "UnstackSigns", "UnstackLine", buf, {
+            lnum = line_num,
+        })
     end
+end
 
-    -- Handle different layout configurations
-    if config.layout == "floating" then
-        -- Open all files in floating windows
+local layout_handlers = {
+    floating = function(matches, config)
         for _, match in ipairs(matches) do
             local file, line_num = match[1], match[2]
             if file and line_num then
-                -- Create a floating window
                 local width = math.floor(vim.o.columns * 0.8)
                 local height = math.floor(vim.o.lines * 0.8)
                 local row = math.floor((vim.o.lines - height) / 2)
@@ -34,17 +31,12 @@ return function(matches)
                 vim.cmd("edit " .. file)
                 vim.cmd(":" .. line_num)
 
-                -- Set up signs if configured
-                if config.showsigns then
-                    vim.fn.sign_place(0, "UnstackSigns", "UnstackLine", buf, {
-                        lnum = line_num,
-                    })
-                end
+                place_sign(config, buf, line_num)
             end
         end
-    elseif config.layout == "tab" then
-        -- Open all files as splits in a new tab
-        -- Capture current settings before creating new tab (using vim.opt to get actual values)
+    end,
+
+    tab = function(matches, config)
         local original_number = vim.opt.number:get()
         local original_relativenumber = vim.opt.relativenumber:get()
 
@@ -54,15 +46,12 @@ return function(matches)
             local file, line_num = match[1], match[2]
             if file and line_num then
                 if i == 1 then
-                    -- First file in the new tab
                     vim.cmd("edit " .. file)
                 else
-                    -- Vertical split for subsequent files, split to the right
                     vim.cmd("rightbelow vsplit " .. file)
                 end
                 vim.cmd(":" .. line_num)
 
-                -- Apply number settings if they were originally enabled
                 if original_number then
                     vim.opt.number = true
                 end
@@ -70,49 +59,92 @@ return function(matches)
                     vim.opt.relativenumber = true
                 end
 
-                -- Set up signs if configured
-                if config.showsigns then
-                    vim.fn.sign_place(
-                        0,
-                        "UnstackSigns",
-                        "UnstackLine",
-                        vim.api.nvim_get_current_buf(),
-                        {
-                            lnum = line_num,
-                        }
-                    )
-                end
+                place_sign(config, vim.api.nvim_get_current_buf(), line_num)
             end
         end
-    else
-        -- Handle vsplit, split, or fallback layouts
-        local open_cmd
-        if config.layout == "vsplit" then
-            open_cmd = "vsplit"
-        elseif config.layout == "split" then
-            open_cmd = "split"
-        else
-            open_cmd = "drop" -- fallback
-        end
+    end,
 
+    vsplit = function(matches, config)
         for _, match in ipairs(matches) do
             local file, line_num = match[1], match[2]
             if file and line_num then
-                vim.cmd(open_cmd .. " " .. file)
+                vim.cmd("vsplit " .. file)
                 vim.cmd(":" .. line_num)
+                place_sign(config, vim.api.nvim_get_current_buf(), line_num)
+            end
+        end
+    end,
 
-                -- Set up signs if configured
-                if config.showsigns then
-                    vim.fn.sign_place(
-                        0,
-                        "UnstackSigns",
-                        "UnstackLine",
-                        vim.api.nvim_get_current_buf(),
-                        {
-                            lnum = line_num,
-                        }
-                    )
+    split = function(matches, config)
+        for _, match in ipairs(matches) do
+            local file, line_num = match[1], match[2]
+            if file and line_num then
+                vim.cmd("split " .. file)
+                vim.cmd(":" .. line_num)
+                place_sign(config, vim.api.nvim_get_current_buf(), line_num)
+            end
+        end
+    end,
+
+    quickfix_list = function(matches, _)
+        local qf_items = {}
+        for _, match in ipairs(matches) do
+            local file, line_num = match[1], match[2]
+            if file and line_num then
+                table.insert(qf_items, {
+                    filename = file,
+                    lnum = line_num,
+                })
+            end
+        end
+        vim.fn.setqflist(qf_items)
+        vim.cmd("copen")
+    end,
+}
+
+---@param matches table: the file path to jump to.
+---@private
+return function(matches)
+    local config = _G.NvimUnstack.config or require("nvim-unstack.config").options
+
+    if config.exclude_patterns and type(config.exclude_patterns) == "table" then
+        local validated_matches = {}
+        for _, match in ipairs(matches) do
+            local file, line_num = match[1], match[2]
+            -- Resolve to absolute path
+            local abs_file = vim.fn.fnamemodify(file, ":p")
+
+            -- Check if file matches any exclude pattern
+            local should_exclude = false
+            for _, pattern in ipairs(config.exclude_patterns) do
+                if abs_file:find(pattern) then
+                    should_exclude = true
+                    break
                 end
+            end
+
+            if not should_exclude then
+                table.insert(validated_matches, { file, line_num })
+            end
+        end
+        matches = validated_matches
+    end
+
+    if #matches == 0 then
+        return
+    end
+
+    local handler = layout_handlers[config.layout]
+    if handler then
+        handler(matches, config)
+    else
+        -- Fallback for unknown layouts
+        for _, match in ipairs(matches) do
+            local file, line_num = match[1], match[2]
+            if file and line_num then
+                vim.cmd("drop " .. file)
+                vim.cmd(":" .. line_num)
+                place_sign(config, vim.api.nvim_get_current_buf(), line_num)
             end
         end
     end

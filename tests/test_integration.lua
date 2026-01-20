@@ -84,7 +84,7 @@ T["Layouts"]["validates layout option"] = function()
 end
 
 T["Layouts"]["accepts valid layouts"] = function()
-    local layouts = { "tab", "vsplit", "split", "floating" }
+    local layouts = { "tab", "vsplit", "split", "floating", "quickfix_list" }
 
     for _, layout in ipairs(layouts) do
         child.restart({ "-u", "scripts/minimal_init.lua" })
@@ -102,6 +102,46 @@ T["Layouts"]["accepts valid layouts"] = function()
         local status = child.lua_get("_G.test_result")
         MiniTest.expect.equality(status, true)
     end
+end
+
+T["Layouts"]["quickfix_list populates quickfix list correctly"] = function()
+    child.lua([[require('nvim-unstack').setup({ layout = "quickfix_list" })]])
+
+    child.lua([[
+        -- Create test matches
+        local matches = {
+            { "test_file1.py", "10" },
+            { "test_file2.py", "20" },
+            { "test_file3.py", "30" },
+        }
+        
+        -- Call open_matches directly with the matches
+        local open_matches = require('nvim-unstack.util.open-matches')
+        open_matches(matches)
+        
+        -- Get the quickfix list
+        local qf_list = vim.fn.getqflist()
+        
+        _G.test_qf_count = #qf_list
+        _G.test_qf_items = {}
+        for i, item in ipairs(qf_list) do
+            _G.test_qf_items[i] = {
+                filename = vim.fn.bufname(item.bufnr),
+                lnum = item.lnum
+            }
+        end
+    ]])
+
+    local qf_count = child.lua_get("_G.test_qf_count")
+    MiniTest.expect.equality(qf_count, 3)
+
+    local qf_items = child.lua_get("_G.test_qf_items")
+    MiniTest.expect.equality(qf_items[1].filename, "test_file1.py")
+    MiniTest.expect.equality(qf_items[1].lnum, 10)
+    MiniTest.expect.equality(qf_items[2].filename, "test_file2.py")
+    MiniTest.expect.equality(qf_items[2].lnum, 20)
+    MiniTest.expect.equality(qf_items[3].filename, "test_file3.py")
+    MiniTest.expect.equality(qf_items[3].lnum, 30)
 end
 
 -- Tests for clipboard functionality
@@ -141,7 +181,7 @@ T["Error handling"]["handles empty input gracefully"] = function()
         local lines = {}
         local status, err = pcall(function()
             local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-            return tracebackFiletype(lines)
+            tracebackFiletype(lines, function(parser) return parser end)
         end)
         _G.test_result = status
     ]])
@@ -163,7 +203,7 @@ at all.
         local lines = vim.split(random_text, "\n")
         local status, err = pcall(function()
             local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-            return tracebackFiletype(lines)
+            tracebackFiletype(lines, function(parser) return parser end)
         end)
         _G.test_result = status
     ]=])
@@ -187,7 +227,7 @@ Traceback (most recent call last):
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local python = require("nvim-unstack.regex.python")
         
         local result = false
@@ -199,6 +239,7 @@ Traceback (most recent call last):
         end
         
         _G.test_result = result
+        end)
     ]=])
 
     local result = child.lua_get("_G.test_result")
@@ -213,7 +254,7 @@ T["Traceback detection"]["detects Pytest traceback"] = function()
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local pytest = require("nvim-unstack.regex.pytest")
         
         local result = false
@@ -225,6 +266,7 @@ T["Traceback detection"]["detects Pytest traceback"] = function()
         end
         
         _G.test_result = result
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -239,7 +281,7 @@ T["Traceback detection"]["detects Node.js traceback"] = function()
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local nodejs = require("nvim-unstack.regex.nodejs")
         
         local result = false
@@ -251,6 +293,7 @@ T["Traceback detection"]["detects Node.js traceback"] = function()
         end
         
         _G.test_result = result
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -265,7 +308,7 @@ T["Traceback detection"]["detects Ruby traceback"] = function()
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local ruby = require("nvim-unstack.regex.ruby")
         
         local result = false
@@ -277,6 +320,7 @@ T["Traceback detection"]["detects Ruby traceback"] = function()
         end
         
         _G.test_result = result
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -291,7 +335,7 @@ T["Traceback detection"]["detects Go traceback"] = function()
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local go = require("nvim-unstack.regex.go")
         
         local result = false
@@ -303,6 +347,7 @@ T["Traceback detection"]["detects Go traceback"] = function()
         end
         
         _G.test_result = result
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -317,9 +362,9 @@ T["Parser edge cases"]["Pytest parser handles colon-only lines"] = function()
 
     child.lua([[
         local pytest = require("nvim-unstack.regex.pytest")
-        local line = "tests/test_example.py:15:"
-        local match = pytest.format_match(line)
-        _G.test_match = match
+        local text = "tests/test_example.py:15:"
+        local matches = pytest.extract_matches(text)
+        _G.test_match = matches[1]
     ]])
 
     local result = child.lua_get("_G.test_match")
@@ -332,15 +377,15 @@ T["Parser edge cases"]["handles files with no line numbers gracefully"] = functi
 
     child.lua([[
         local pytest = require("nvim-unstack.regex.pytest")
-        local line = "FAILED tests/test_math.py::test_division - ZeroDivisionError"
-        local match = pytest.format_match(line)
-        _G.test_match = match
+        local text = "FAILED tests/test_math.py::test_division - ZeroDivisionError"
+        local matches = pytest.extract_matches(text)
+        _G.test_match = matches[1]
     ]])
 
     local result = child.lua_get("_G.test_match")
     MiniTest.expect.equality(result[1], "tests/test_math.py")
-    -- Line number should be nil
-    MiniTest.expect.equality(result[2], nil)
+    -- Line number should default to 1
+    MiniTest.expect.equality(result[2], "1")
 end
 
 return T

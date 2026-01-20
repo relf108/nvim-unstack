@@ -28,6 +28,7 @@
 ## ⚡️ Features
 
 - **Multi-language support**: Built-in regex parsers for Python, Node.js, Ruby, Go, C#, Perl, and GDB/LLDB
+- **Smart parser selection**: Automatically detects the right parser, or lets you choose when multiple match
 - **Flexible layouts**: Open files in tabs, vertical splits, horizontal splits, or floating windows
 - **Visual indicators**: Optional signs to highlight stack trace lines
 - **Multiple input methods**: Parse from visual selection, clipboard, or tmux paste buffer
@@ -210,6 +211,10 @@ require("nvim-unstack").setup({
 
   -- Show signs on lines from stack trace (default: true)
   showsigns = true,
+
+  -- Use first matching parser (default: true)
+  -- When false, shows a selection prompt if multiple parsers match
+  use_first_parser = true,
 })
 ```
 
@@ -221,6 +226,15 @@ require("nvim-unstack").setup({
 - **`"vsplit"`**: Opens each file in a new vertical split
 - **`"split"`**: Opens each file in a new horizontal split
 - **`"floating"`**: Opens each file in a floating window
+
+#### Multiple Parser Matching
+
+The `use_first_parser` option controls behavior when multiple parsers can parse the same stack trace:
+
+- **`true`** (default): Automatically uses the first matching parser
+- **`false`**: Shows a selection prompt with parser names (e.g., "Python", "Pytest", "Node.js")
+
+This is particularly useful for Python projects where both standard Python tracebacks and Pytest output might be present. Each parser has a descriptive name to help you choose the right one.
 
 #### Visual Signs
 
@@ -311,23 +325,28 @@ You can extend nvim-unstack to support additional languages by creating custom r
 
 local java = {}
 
+-- Display name for parser selection prompt
+java.name = "Java"
+
 -- Regex pattern to match Java stack trace lines
 java.regex = vim.regex([[at .*(\(.*\.java:[0-9]\+\))]])
 
--- Function to extract file and line number from matched line
-function java.format_match(line, lines, index)
-    local file = line:match("%((.*)%.java:")
-    local line_num = line:match(":([0-9]+)%)")
-
-    if file and line_num then
-        return { file .. ".java", line_num }
+-- Function to extract file and line numbers from entire traceback text
+function java.extract_matches(text)
+    local matches = {}
+    
+    -- Match Java stack trace format
+    for file, line_num in text:gmatch("%((.*)%.java:([0-9]+)%)") do
+        table.insert(matches, { file .. ".java", line_num })
     end
-
-    return nil
+    
+    return matches
 end
 
 return java
 ```
+
+**Note:** The `name` field is required for displaying the parser in the selection prompt when `use_first_parser = false`.
 
 ### Custom Layout Configurations
 
