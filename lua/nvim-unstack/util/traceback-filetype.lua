@@ -32,7 +32,8 @@ return function(selection, callback)
         for _, line in ipairs(selection) do
             if v_parser.regex:match_str(line) == 0 then
                 if _G.NvimUnstack.config.use_first_parser then
-                    return v_parser
+                    callback(v_parser)
+                    return
                 end
 
                 table.insert(matched_parsers, v_parser)

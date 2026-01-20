@@ -28,8 +28,9 @@ Traceback (most recent call last):\n\
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
-        _G.test_result = parser ~= nil and type(parser.regex) == "userdata"
+        tracebackFiletype(lines, function(parser)
+            _G.test_result = parser ~= nil and type(parser.regex) == "userdata"
+        end)
     ]=])
 
     local result = child.lua_get("_G.test_result")
@@ -124,8 +125,9 @@ T["Pytest parser"]["parses pytest failure output"] = function()
         }
         
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         _G.test_result = parser ~= nil
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -175,8 +177,9 @@ T["Node.js parser"]["parses Node.js stack trace"] = function()
         }
 
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         _G.test_result = parser ~= nil
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -212,8 +215,9 @@ T["Ruby parser"]["parses Ruby backtrace"] = function()
         }
 
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         _G.test_result = parser ~= nil
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -253,8 +257,9 @@ T["Go parser"]["parses Go panic stack trace"] = function()
         }
 
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         _G.test_result = parser ~= nil
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -295,11 +300,12 @@ T["Multiple matches"]["extracts all Python matches from traceback"] = function()
         }
 
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local text = table.concat(lines, "\n")
         local matches = parser.extract_matches(text)
         
         _G.test_count = #matches
+        end)
     ]])
 
     local count = child.lua_get("_G.test_count")
@@ -318,11 +324,12 @@ T["Multiple matches"]["extracts all Node.js matches from traceback"] = function(
         }
 
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local text = table.concat(lines, "\n")
         local matches = parser.extract_matches(text)
         
         _G.test_count = #matches
+        end)
     ]])
 
     local count = child.lua_get("_G.test_count")

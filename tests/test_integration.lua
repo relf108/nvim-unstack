@@ -181,7 +181,7 @@ T["Error handling"]["handles empty input gracefully"] = function()
         local lines = {}
         local status, err = pcall(function()
             local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-            return tracebackFiletype(lines)
+            tracebackFiletype(lines, function(parser) return parser end)
         end)
         _G.test_result = status
     ]])
@@ -203,7 +203,7 @@ at all.
         local lines = vim.split(random_text, "\n")
         local status, err = pcall(function()
             local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-            return tracebackFiletype(lines)
+            tracebackFiletype(lines, function(parser) return parser end)
         end)
         _G.test_result = status
     ]=])
@@ -227,7 +227,7 @@ Traceback (most recent call last):
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local python = require("nvim-unstack.regex.python")
         
         local result = false
@@ -239,6 +239,7 @@ Traceback (most recent call last):
         end
         
         _G.test_result = result
+        end)
     ]=])
 
     local result = child.lua_get("_G.test_result")
@@ -253,7 +254,7 @@ T["Traceback detection"]["detects Pytest traceback"] = function()
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local pytest = require("nvim-unstack.regex.pytest")
         
         local result = false
@@ -265,6 +266,7 @@ T["Traceback detection"]["detects Pytest traceback"] = function()
         end
         
         _G.test_result = result
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -279,7 +281,7 @@ T["Traceback detection"]["detects Node.js traceback"] = function()
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local nodejs = require("nvim-unstack.regex.nodejs")
         
         local result = false
@@ -291,6 +293,7 @@ T["Traceback detection"]["detects Node.js traceback"] = function()
         end
         
         _G.test_result = result
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -305,7 +308,7 @@ T["Traceback detection"]["detects Ruby traceback"] = function()
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local ruby = require("nvim-unstack.regex.ruby")
         
         local result = false
@@ -317,6 +320,7 @@ T["Traceback detection"]["detects Ruby traceback"] = function()
         end
         
         _G.test_result = result
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
@@ -331,7 +335,7 @@ T["Traceback detection"]["detects Go traceback"] = function()
 
         local lines = vim.split(traceback, "\n")
         local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
-        local parser = tracebackFiletype(lines)
+        tracebackFiletype(lines, function(parser)
         local go = require("nvim-unstack.regex.go")
         
         local result = false
@@ -343,6 +347,7 @@ T["Traceback detection"]["detects Go traceback"] = function()
         end
         
         _G.test_result = result
+        end)
     ]])
 
     local result = child.lua_get("_G.test_result")
