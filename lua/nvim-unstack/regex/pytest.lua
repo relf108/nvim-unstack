@@ -21,7 +21,8 @@ function pytest.extract_matches(text)
 
     -- Match FAILED lines like: FAILED tests/test_math.py::test_division
     for file in text:gmatch("FAILED ([^:]+%.py)") do
-        table.insert(matches, { file, nil })
+        -- Default to line 1 for these matches as they don't have a line number
+        table.insert(matches, { file, 1 })
     end
 
     return matches
