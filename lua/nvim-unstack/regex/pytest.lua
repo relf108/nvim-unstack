@@ -13,14 +13,16 @@ pytest.regex = vim.regex([[\v(^\s*\S+\.py:\d+:|^FAILED \S+\.py)]])
 ---@private
 function pytest.extract_matches(text)
     local matches = {}
+    -- Unwrap line-wrapped content by joining lines that don't start with whitespace
+    local unwrapped = text:gsub("\n([^%s])", "%1")
 
     -- Match pytest output lines like: tests/test_example.py:42: AssertionError
-    for file, line_num in text:gmatch("(%S+%.py):(%d+):") do
+    for file, line_num in unwrapped:gmatch("(%S+%.py):(%d+):") do
         table.insert(matches, { file, line_num })
     end
 
     -- Match FAILED lines like: FAILED tests/test_math.py::test_division
-    for file in text:gmatch("FAILED ([^:]+%.py)") do
+    for file in unwrapped:gmatch("FAILED ([^:]+%.py)") do
         -- FAILED summary lines don't include a line number; we still want a
         -- clickable location in the file, so we default to line 1 as a
         -- deterministic, safe choice. This may not be the exact failure line,

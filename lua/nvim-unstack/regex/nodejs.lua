@@ -8,8 +8,11 @@ nodejs.regex = vim.regex([[\v^ +at .+\((.+):(\d+):\d+\)$]])
 ---@private
 function nodejs.extract_matches(text)
     local matches = {}
+    -- Unwrap line-wrapped content by joining lines that don't start with whitespace
+    local unwrapped = text:gsub("\n([^%s])", "%1")
+
     -- Match Node.js stack trace format
-    for file, line_num in text:gmatch("%s+at [^(]+%(([^:]+):(%d+):%d+%)") do
+    for file, line_num in unwrapped:gmatch("%s+at [^(]+%(([^:]+):(%d+):%d+%)") do
         table.insert(matches, { file, line_num })
     end
     return matches

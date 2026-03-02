@@ -8,8 +8,11 @@ csharp.regex = vim.regex([[\v^[ \t]*at .*\(.*\) in (.+):line ([0-9]+) *$]])
 ---@private
 function csharp.extract_matches(text)
     local matches = {}
+    -- Unwrap line-wrapped content by joining lines that don't start with whitespace
+    local unwrapped = text:gsub("\n([^%s])", "%1")
+
     -- Match C# stack trace format
-    for file, line_num in text:gmatch(" in ([^:]+):line (%d+)") do
+    for file, line_num in unwrapped:gmatch(" in ([^:]+):line (%d+)") do
         table.insert(matches, { file, line_num })
     end
     return matches

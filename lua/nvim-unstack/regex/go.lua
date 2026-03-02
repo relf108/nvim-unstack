@@ -8,9 +8,12 @@ go.regex = vim.regex([[\v^[ \t]*(.+):(\d+) \+0x\x+$]])
 ---@private
 function go.extract_matches(text)
     local matches = {}
+    -- Unwrap line-wrapped content by joining lines that don't start with whitespace
+    local unwrapped = text:gsub("\n([^%s])", "%1")
+
     -- Match Go panic stack trace format
     -- Pattern: whitespace followed by path:line +0xhex
-    for match in text:gmatch("[^\n]+") do
+    for match in unwrapped:gmatch("[^\n]+") do
         local stripped = match:gsub("^[ \t]+", "")
         local file, line_num = stripped:match("^([^:]+):(%d+) %+0x%x+$")
         if file and line_num then

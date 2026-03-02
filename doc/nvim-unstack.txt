@@ -1,3 +1,5 @@
+==============================================================================
+------------------------------------------------------------------------------
                                                            *NvimUnstack.options*
                              `NvimUnstack.options`
 NvimUnstack configuration with its default values.

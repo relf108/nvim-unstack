@@ -8,8 +8,11 @@ gdb_lldb.regex = vim.regex([[\v^[ *]*%(frame )?#\d+:? +0[xX][0-9a-fA-F]+ .+ at (
 ---@private
 function gdb_lldb.extract_matches(text)
     local matches = {}
+    -- Unwrap line-wrapped content by joining lines that don't start with whitespace
+    local unwrapped = text:gsub("\n([^%s])", "%1")
+
     -- Match GDB/LLDB stack trace format
-    for file, line_num in text:gmatch(" at ([^:]+):(%d+)") do
+    for file, line_num in unwrapped:gmatch(" at ([^:]+):(%d+)") do
         table.insert(matches, { file, line_num })
     end
     return matches

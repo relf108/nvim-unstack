@@ -75,16 +75,17 @@ T["Python parser"]["handles filename wrapping over two lines"] = function()
 
     child.lua([[
         local python = require("nvim-unstack.regex.python")
-        -- When filename has a literal newline in the quoted string, parser should match
+        -- When filename wraps to next line without leading whitespace (terminal line wrap)
         local text = '  File "/home/user/very/long/path/that/continues/\nto/another/line/file.py", line 456, in function_name'
         local matches = python.extract_matches(text)
         _G.test_match = matches[1]
     ]])
 
     local result = child.lua_get("_G.test_match")
+    -- After unwrapping, the filename should be continuous
     MiniTest.expect.equality(
         result[1],
-        "/home/user/very/long/path/that/continues/\nto/another/line/file.py"
+        "/home/user/very/long/path/that/continues/to/another/line/file.py"
     )
     MiniTest.expect.equality(result[2], "456")
 end
@@ -104,6 +105,25 @@ T["Python parser"]["handles filename and line number over two lines"] = function
     -- The pattern now uses %s* to match whitespace including newlines
     MiniTest.expect.equality(result[1], "/home/user/project/src/components/utils/helpers.py")
     MiniTest.expect.equality(result[2], "789")
+end
+
+T["Python parser"]["handles word 'line' split across lines"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local python = require("nvim-unstack.regex.python")
+        -- When the word "line" itself is split across lines (e.g., "l\nine")
+        local text = '  File "/Users/tristan.sutton/Origin/appdev-b2b-api/src/endpoints/energy.py", l\nine 337, in get_site_benefit'
+        local matches = python.extract_matches(text)
+        _G.test_match = matches[1]
+    ]])
+
+    local result = child.lua_get("_G.test_match")
+    MiniTest.expect.equality(
+        result[1],
+        "/Users/tristan.sutton/Origin/appdev-b2b-api/src/endpoints/energy.py"
+    )
+    MiniTest.expect.equality(result[2], "337")
 end
 
 -- Tests for Pytest parser
