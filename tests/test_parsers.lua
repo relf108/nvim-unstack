@@ -75,8 +75,10 @@ T["Python parser"]["handles filename wrapping over two lines"] = function()
 
     child.lua([[
         local python = require("nvim-unstack.regex.python")
-        -- When filename wraps to next line without leading whitespace (terminal line wrap)
-        local text = '  File "/home/user/very/long/path/that/continues/\nto/another/line/file.py", line 456, in function_name'
+        -- When filename wraps to next line without leading whitespace
+        -- (terminal hard wrap: the first segment is exactly terminal-width
+        -- chars, so it is always the longest line in the selection)
+        local text = '  File "/home/user/very/long/path/that/continues/to/another/\nline/file.py", line 456, in function_name'
         local matches = python.extract_matches(text)
         _G.test_match = matches[1]
     ]])
@@ -124,6 +126,32 @@ T["Python parser"]["handles word 'line' split across lines"] = function()
         "/Users/tristan.sutton/Origin/appdev-b2b-api/src/endpoints/energy.py"
     )
     MiniTest.expect.equality(result[2], "337")
+end
+
+T["Python parser"]["rejoins paths hard-wrapped by the terminal"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local python = require("nvim-unstack.regex.python")
+        local width = 80
+        local full = "/Users/tristan.sutton/Origin/appdev-api-charts/src/endpoints/deeply/nested/energy.py"
+        local frame = '  File "' .. full .. '", line 337, in handler'
+        local lines = {
+            "Traceback (most recent call last):",
+            frame:sub(1, width),
+            frame:sub(width + 1),
+            "    raise ValueError(\"test error\")",
+            "ValueError: test error",
+        }
+        _G.test_full = full
+        _G.test_matches = python.extract_matches(table.concat(lines, "\n"))
+    ]])
+
+    local matches = child.lua_get("_G.test_matches")
+    local full = child.lua_get("_G.test_full")
+    MiniTest.expect.equality(#matches, 1)
+    MiniTest.expect.equality(matches[1][1], full)
+    MiniTest.expect.equality(matches[1][2], "337")
 end
 
 -- Tests for Pytest parser
@@ -300,6 +328,33 @@ T["Node.js parser"]["extracts file and line number"] = function()
     MiniTest.expect.equality(result[2], "15")
 end
 
+T["Node.js parser"]["rejoins paths hard-wrapped by the terminal"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local nodejs = require("nvim-unstack.regex.nodejs")
+        local width = 80
+        local full = "/home/user/project/very/long/nested/path/to/some/module/src/processor.js"
+        local frame = "    at processData (" .. full .. ":15:10)"
+        local lines = {
+            "Error: Something went wrong",
+            frame:sub(1, width),
+            frame:sub(width + 1),
+            "    at main (/home/user/project/index.js:42:5)",
+        }
+        _G.test_full = full
+        _G.test_matches = nodejs.extract_matches(table.concat(lines, "\n"))
+    ]])
+
+    local matches = child.lua_get("_G.test_matches")
+    local full = child.lua_get("_G.test_full")
+    MiniTest.expect.equality(#matches, 2)
+    MiniTest.expect.equality(matches[1][1], full)
+    MiniTest.expect.equality(matches[1][2], "15")
+    MiniTest.expect.equality(matches[2][1], "/home/user/project/index.js")
+    MiniTest.expect.equality(matches[2][2], "42")
+end
+
 -- Tests for Ruby parser
 T["Ruby parser"] = MiniTest.new_set()
 
@@ -336,6 +391,32 @@ T["Ruby parser"]["extracts file and line number"] = function()
     local result = child.lua_get("_G.test_match")
     MiniTest.expect.equality(result[1], "/home/user/app/main.rb")
     MiniTest.expect.equality(result[2], "42")
+end
+
+T["Ruby parser"]["rejoins paths hard-wrapped by the terminal"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local ruby = require("nvim-unstack.regex.ruby")
+        local width = 80
+        local full = "/home/user/app/services/very/long/nested/path/to/deeply/buried/processor.rb"
+        local frame = "\tfrom " .. full .. ":15:in `process'"
+        local lines = {
+            "\tfrom /home/user/app/main.rb:42:in `main'",
+            frame:sub(1, width),
+            frame:sub(width + 1),
+        }
+        _G.test_full = full
+        _G.test_matches = ruby.extract_matches(table.concat(lines, "\n"))
+    ]])
+
+    local matches = child.lua_get("_G.test_matches")
+    local full = child.lua_get("_G.test_full")
+    MiniTest.expect.equality(#matches, 2)
+    MiniTest.expect.equality(matches[1][1], "/home/user/app/main.rb")
+    MiniTest.expect.equality(matches[1][2], "42")
+    MiniTest.expect.equality(matches[2][1], full)
+    MiniTest.expect.equality(matches[2][2], "15")
 end
 
 -- Tests for Go parser
@@ -379,6 +460,33 @@ T["Go parser"]["extracts file and line number"] = function()
     -- The Go parser strips leading whitespace
     MiniTest.expect.equality(result[1], "/home/user/project/processor.go")
     MiniTest.expect.equality(result[2], "15")
+end
+
+T["Go parser"]["rejoins paths hard-wrapped by the terminal"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local go = require("nvim-unstack.regex.go")
+        local width = 80
+        local full = "/home/user/go/src/github.com/org/repo/internal/service/deeply/nested/handler.go"
+        local frame = "\t" .. full .. ":42 +0x1a"
+        local lines = {
+            "goroutine 1 [running]:",
+            "main.main()",
+            frame:sub(1, width),
+            frame:sub(width + 1),
+        }
+        _G.test_full = full
+        _G.test_matches = go.extract_matches(table.concat(lines, "\n"))
+    ]])
+
+    local matches = child.lua_get("_G.test_matches")
+    local full = child.lua_get("_G.test_full")
+    -- The wrap-continuation segment also looks like a location line on its
+    -- own; the parser must suppress it rather than emit a partial path.
+    MiniTest.expect.equality(#matches, 1)
+    MiniTest.expect.equality(matches[1][1], full)
+    MiniTest.expect.equality(matches[1][2], "42")
 end
 
 -- Tests for multiple matches in single traceback

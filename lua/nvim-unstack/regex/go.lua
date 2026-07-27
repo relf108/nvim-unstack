@@ -1,26 +1,24 @@
+local unwrap = require("nvim-unstack.util.unwrap")
+
 local go = {}
 
 go.name = "Go"
 go.regex = vim.regex([[\v^[ \t]*(.+):(\d+) \+0x\x+$]])
 
+-- Match a single logical line like:
+--   /app/main.go:42 +0x1a
+---@param line string
+---@return string|nil file
+---@return string|nil line_num
+local function match_line(line)
+    return line:match("^%s*([^:%s]+):(%d+) %+0x%x+%s*$")
+end
+
 ---@param text string: entire traceback as single string
 ---@return table: array of matches
 ---@private
 function go.extract_matches(text)
-    local matches = {}
-    -- Unwrap line-wrapped content by joining lines that don't start with whitespace
-    local unwrapped = text:gsub("\n([^%s])", "%1")
-
-    -- Match Go panic stack trace format
-    -- Pattern: whitespace followed by path:line +0xhex
-    for match in unwrapped:gmatch("[^\n]+") do
-        local stripped = match:gsub("^[ \t]+", "")
-        local file, line_num = stripped:match("^([^:]+):(%d+) %+0x%x+$")
-        if file and line_num then
-            table.insert(matches, { file, line_num })
-        end
-    end
-    return matches
+    return unwrap.extract_matches(text, match_line)
 end
 
 return go
