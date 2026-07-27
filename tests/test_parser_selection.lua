@@ -47,12 +47,14 @@ end
 T["use_first_parser"]["shows popup when disabled with multiple matches"] = function()
     child.lua([[require('nvim-unstack').setup({ use_first_parser = false })]])
 
-    -- Python traceback that both python and pytest parsers would match
+    -- Pytest --tb=native output: python parser matches the File line,
+    -- pytest parser matches the FAILED summary line
     local python_traceback = [[
 Traceback (most recent call last):
   File "/app/main.py", line 10, in <module>
     raise ValueError("test error")
 ValueError: test error
+FAILED tests/test_math.py::test_division - ValueError
 ]]
 
     child.lua(string.format(
@@ -102,11 +104,13 @@ end
 T["use_first_parser"]["uses first parser when user cancels popup"] = function()
     child.lua([[require('nvim-unstack').setup({ use_first_parser = false })]])
 
+    -- Matches both python and pytest parsers so the popup actually shows
     local python_traceback = [[
 Traceback (most recent call last):
   File "/app/main.py", line 10, in <module>
     raise ValueError("test error")
 ValueError: test error
+FAILED tests/test_math.py::test_division - ValueError
 ]]
 
     child.lua(string.format(
@@ -179,11 +183,13 @@ T["Parser selection"] = MiniTest.new_set()
 T["Parser selection"]["formats parser names in popup"] = function()
     child.lua([[require('nvim-unstack').setup({ use_first_parser = false })]])
 
+    -- Matches both python and pytest parsers so the popup actually shows
     local python_traceback = [[
 Traceback (most recent call last):
   File "/app/main.py", line 10, in <module>
     raise ValueError("test error")
 ValueError: test error
+FAILED tests/test_math.py::test_division - ValueError
 ]]
 
     child.lua(string.format(

@@ -183,6 +183,85 @@ T["Pytest parser"]["handles FAILED lines"] = function()
     MiniTest.expect.equality(result[1], "tests/test_math.py")
 end
 
+T["Pytest parser"]["handles ERROR summary lines"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local pytest = require("nvim-unstack.regex.pytest")
+        local text = "ERROR tests/unit/test_utils.py"
+        local matches = pytest.extract_matches(text)
+        _G.test_match = matches[1]
+    ]])
+
+    local result = child.lua_get("_G.test_match")
+    MiniTest.expect.equality(result[1], "tests/unit/test_utils.py")
+    MiniTest.expect.equality(result[2], "1")
+end
+
+T["Pytest parser"]["parses collection error without caret-line corruption"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local pytest = require("nvim-unstack.regex.pytest")
+        local full = "../../.local/share/uv/python/cpython-3.13.13/lib/python3.13/importlib/__init__.py"
+        local lines = {
+            "__________ ERROR collecting tests/unit/test_utils.py __________",
+            "Traceback:",
+            full .. ":88: in import_module",
+            "    return _bootstrap._gcd_import(name[level:], package, level)",
+            "           " .. string.rep("^", 44),
+            "tests/unit/test_utils.py:1: in <module>",
+            "    from src.utils import fix_openapi_spec_anyof",
+            "E   ImportError: cannot import name 'fix_openapi_spec_anyof' from 'src.utils'",
+            "ERROR tests/unit/test_utils.py",
+        }
+        _G.test_full = full
+        _G.test_matches = pytest.extract_matches(table.concat(lines, "\n"))
+    ]])
+
+    local matches = child.lua_get("_G.test_matches")
+    local full = child.lua_get("_G.test_full")
+    MiniTest.expect.equality(#matches, 2)
+    MiniTest.expect.equality(matches[1][1], full)
+    MiniTest.expect.equality(matches[1][2], "88")
+    MiniTest.expect.equality(matches[2][1], "tests/unit/test_utils.py")
+    MiniTest.expect.equality(matches[2][2], "1")
+end
+
+T["Pytest parser"]["rejoins paths hard-wrapped by the terminal"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local pytest = require("nvim-unstack.regex.pytest")
+        local width = 80
+        local full = "../../.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/python3.13/importlib/__init__.py"
+        local loc = full .. ":88: in import_module"
+        local lines = {
+            string.rep("=", 36) .. " ERRORS " .. string.rep("=", 36),
+            "Traceback:",
+            loc:sub(1, width),
+            loc:sub(width + 1),
+            "    return _bootstrap._gcd_import(name[level:], package, level)",
+            "           " .. string.rep("^", 44),
+            "tests/unit/test_utils.py:1: in <module>",
+            "    from src.utils import fix_openapi_spec_anyof",
+            "E   ImportError: cannot import name 'fix_openapi_spec_anyof' from 'src.utils'",
+            string.rep("=", width),
+            "ERROR tests/unit/test_utils.py",
+        }
+        _G.test_full = full
+        _G.test_matches = pytest.extract_matches(table.concat(lines, "\n"))
+    ]])
+
+    local matches = child.lua_get("_G.test_matches")
+    local full = child.lua_get("_G.test_full")
+    MiniTest.expect.equality(#matches, 2)
+    MiniTest.expect.equality(matches[1][1], full)
+    MiniTest.expect.equality(matches[1][2], "88")
+    MiniTest.expect.equality(matches[2][1], "tests/unit/test_utils.py")
+    MiniTest.expect.equality(matches[2][2], "1")
+end
+
 -- Tests for Node.js parser
 T["Node.js parser"] = MiniTest.new_set()
 
