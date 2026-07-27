@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-07-27
+
+### Added
+- Pytest parser now handles `ERROR` collection summary lines (e.g. `ERROR tests/unit/test_utils.py`)
+- Shared wrap-aware traceback parsing utility (`util/unwrap.lua`) used by all parsers
+- Regression tests for wrapped and unwrapped traces across Python, Pytest, Node.js, Ruby, and Go
+
+### Fixed
+- Paths hard-wrapped by the terminal are correctly rejoined at any terminal width
+- Quickfix entries no longer corrupted by caret/header lines being glued onto file paths during unwrapping
+- Duplicate quickfix entries for the same file and line are removed
+- Wrap-continuation segments that look like standalone locations no longer emit partial paths
+- C# parser keeps Windows drive-letter colons (`C:\...`) in file paths
+- Parser selection popup tests broken since their introduction
+
 ## [1.3.1] - 2026-03-02
 
 ### Fixed
