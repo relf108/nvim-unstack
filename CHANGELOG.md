@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-08-04
+
+### Fixed
+- Pytest parser no longer emits a misleading best-guess line 1 match for `FAILED`/`ERROR` summary lines that carry no line number
+
 ## [1.4.0] - 2026-07-27
 
 ### Added
