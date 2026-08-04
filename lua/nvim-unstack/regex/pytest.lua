@@ -22,16 +22,6 @@ local function match_line(line)
         return file, line_num
     end
 
-    -- Summary lines like:
-    --   FAILED tests/test_math.py::test_division - ZeroDivisionError
-    --   ERROR tests/unit/test_utils.py
-    -- These carry no line number; default to line 1 so there is still a
-    -- deterministic jump target.
-    file = line:match("^FAILED%s+([^%s:]+%.py)") or line:match("^ERROR%s+([^%s:]+%.py)")
-    if file then
-        return file, "1"
-    end
-
     return nil, nil
 end
 
