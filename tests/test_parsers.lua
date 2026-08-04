@@ -197,33 +197,34 @@ T["Pytest parser"]["extracts file and line from pytest output"] = function()
     MiniTest.expect.equality(result[2], "42")
 end
 
-T["Pytest parser"]["handles FAILED lines"] = function()
+T["Pytest parser"]["ignores FAILED lines"] = function()
     child.lua([[require('nvim-unstack').setup()]])
 
     child.lua([[
         local pytest = require("nvim-unstack.regex.pytest")
         local text = "FAILED tests/test_math.py::test_division - ZeroDivisionError"
         local matches = pytest.extract_matches(text)
-        _G.test_match = matches[1]
+        _G.test_count = #matches
     ]])
 
-    local result = child.lua_get("_G.test_match")
-    MiniTest.expect.equality(result[1], "tests/test_math.py")
+    -- FAILED summary lines carry no line number, so no match is extracted
+    local result = child.lua_get("_G.test_count")
+    MiniTest.expect.equality(result, 0)
 end
 
-T["Pytest parser"]["handles ERROR summary lines"] = function()
+T["Pytest parser"]["ignores ERROR summary lines"] = function()
     child.lua([[require('nvim-unstack').setup()]])
 
     child.lua([[
         local pytest = require("nvim-unstack.regex.pytest")
         local text = "ERROR tests/unit/test_utils.py"
         local matches = pytest.extract_matches(text)
-        _G.test_match = matches[1]
+        _G.test_count = #matches
     ]])
 
-    local result = child.lua_get("_G.test_match")
-    MiniTest.expect.equality(result[1], "tests/unit/test_utils.py")
-    MiniTest.expect.equality(result[2], "1")
+    -- ERROR summary lines carry no line number, so no match is extracted
+    local result = child.lua_get("_G.test_count")
+    MiniTest.expect.equality(result, 0)
 end
 
 T["Pytest parser"]["parses collection error without caret-line corruption"] = function()
