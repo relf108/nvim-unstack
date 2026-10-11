@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-11
+
+### Added
+- `UnstackFromFile` command to load a stack trace from a file instead of the last yanked/copied text
+
 ## [1.4.1] - 2026-08-04
 
 ### Fixed
