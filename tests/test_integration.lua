@@ -171,6 +171,127 @@ T["Clipboard"]["handles empty clipboard"] = function()
     MiniTest.expect.equality(result, true)
 end
 
+-- Tests for file input functionality
+T["File input"] = MiniTest.new_set()
+
+T["File input"]["notifies on missing file"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local notified = false
+        local original_notify = vim.notify
+        vim.notify = function(msg, level)
+            if level == vim.log.levels.WARN then
+                notified = true
+            end
+        end
+
+        require('nvim-unstack').unstack_from_file("/does/not/exist.log")
+        vim.notify = original_notify
+
+        _G.test_result = notified
+    ]])
+
+    local result = child.lua_get("_G.test_result")
+    MiniTest.expect.equality(result, true)
+end
+
+T["File input"]["notifies on empty file"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local path = vim.fn.tempname()
+        vim.fn.writefile({}, path)
+
+        local notified = false
+        local original_notify = vim.notify
+        vim.notify = function(msg, level)
+            if level == vim.log.levels.WARN then
+                notified = true
+            end
+        end
+
+        require('nvim-unstack').unstack_from_file(path)
+        vim.notify = original_notify
+        vim.fn.delete(path)
+
+        _G.test_result = notified
+    ]])
+
+    local result = child.lua_get("_G.test_result")
+    MiniTest.expect.equality(result, true)
+end
+
+T["File input"]["parses traceback from file"] = function()
+    child.lua([[require('nvim-unstack').setup({ layout = "quickfix_list" })]])
+
+    child.lua([[
+        local path = vim.fn.tempname()
+        vim.fn.writefile({
+            'Traceback (most recent call last):',
+            '  File "/path/to/file.py", line 42, in main',
+            '    do_something()',
+        }, path)
+
+        require('nvim-unstack').unstack_from_file(path)
+        vim.fn.delete(path)
+
+        local qf_list = vim.fn.getqflist()
+        _G.test_qf_count = #qf_list
+        _G.test_qf_items = {}
+        for i, item in ipairs(qf_list) do
+            _G.test_qf_items[i] = {
+                filename = vim.fn.bufname(item.bufnr),
+                lnum = item.lnum,
+            }
+        end
+    ]])
+
+    local qf_count = child.lua_get("_G.test_qf_count")
+    MiniTest.expect.equality(qf_count, 1)
+
+    local qf_items = child.lua_get("_G.test_qf_items")
+    MiniTest.expect.equality(qf_items[1].filename, "/path/to/file.py")
+    MiniTest.expect.equality(qf_items[1].lnum, 42)
+end
+
+T["File input"]["expands ~ in filepath"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    child.lua([[
+        local tmpdir = vim.fn.tempname()
+        vim.fn.mkdir(tmpdir, "p")
+        vim.env.HOME = tmpdir
+        vim.fn.writefile({ "line one", "line two" }, tmpdir .. "/trace.log")
+
+        _G.test_lines = require("nvim-unstack.util.get-file-lines")("~/trace.log")
+
+        vim.fn.delete(tmpdir, "rf")
+    ]])
+
+    local lines = child.lua_get("_G.test_lines")
+    MiniTest.expect.equality(lines, { "line one", "line two" })
+end
+
+T["File input"]["get-file-lines returns empty table for missing file"] = function()
+    child.lua([[
+        _G.test_lines = require("nvim-unstack.util.get-file-lines")("/does/not/exist.log")
+    ]])
+
+    local lines = child.lua_get("_G.test_lines")
+    MiniTest.expect.equality(lines, {})
+end
+
+T["File input"]["registers UnstackFromFile command"] = function()
+    child.lua([[require('nvim-unstack').setup()]])
+
+    local exists = child.lua_get([[vim.fn.exists(":UnstackFromFile")]])
+    MiniTest.expect.equality(exists, 2)
+
+    local nargs = child.lua_get([[vim.api.nvim_get_commands({})["UnstackFromFile"].nargs]])
+    MiniTest.expect.equality(nargs, "1")
+end
+
 -- Tests for error handling
 T["Error handling"] = MiniTest.new_set()
 

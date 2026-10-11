@@ -31,7 +31,7 @@
 - **Smart parser selection**: Automatically detects the right parser, or lets you choose when multiple match
 - **Flexible layouts**: Open files in tabs, vertical splits, horizontal splits, floating windows, or quickfix list
 - **Visual indicators**: Optional signs to highlight stack trace lines
-- **Multiple input methods**: Parse from visual selection, clipboard, or tmux paste buffer
+- **Multiple input methods**: Parse from visual selection, clipboard, tmux paste buffer, or a file
 - **Configurable keymaps**: Customize the key binding for stack trace parsing
 - **Easy extension**: Simple API for adding custom language parsers
 - **Zero dependencies**: Pure Lua implementation with no external requirements
@@ -173,6 +173,7 @@ require("nvim-unstack").setup()
 1. **Visual Selection**: Select a stack trace (or part of one) and press `<leader>s` to open the referenced files
 2. **From Clipboard**: Use `:UnstackFromClipboard` to parse a stack trace from your system clipboard
 3. **From Tmux**: Use `:UnstackFromTmux` to parse a stack trace from tmux paste buffer
+4. **From File**: Use `:UnstackFromFile <path>` to parse a stack trace from a file
 
 ### Example
 
@@ -308,11 +309,12 @@ Enable `debug = true` to see detailed logging about:
 
 nvim-unstack provides several commands for different use cases:
 
-| Command                 | Description                                     |
-| ----------------------- | ----------------------------------------------- |
-| `:NvimUnstack`          | Parse stack trace from current visual selection |
-| `:UnstackFromClipboard` | Parse stack trace from system clipboard         |
-| `:UnstackFromTmux`      | Parse stack trace from tmux paste buffer        |
+| Command                   | Description                                     |
+| ------------------------- | ----------------------------------------------- |
+| `:NvimUnstack`            | Parse stack trace from current visual selection |
+| `:UnstackFromClipboard`   | Parse stack trace from system clipboard         |
+| `:UnstackFromTmux`        | Parse stack trace from tmux paste buffer        |
+| `:UnstackFromFile <path>` | Parse stack trace from a file                   |
 
 ### Command Usage Examples
 
@@ -325,6 +327,9 @@ nvim-unstack provides several commands for different use cases:
 
 " Parse from tmux buffer
 :UnstackFromTmux
+
+" Parse from file
+:UnstackFromFile /path/to/traceback.log
 ```
 
 ## 🔧 API
@@ -344,6 +349,9 @@ nvim_unstack.unstack_from_clipboard()
 
 -- Parse from tmux paste buffer
 nvim_unstack.unstack_from_tmux()
+
+-- Parse from file
+nvim_unstack.unstack_from_file("/path/to/traceback.log")
 
 -- Setup with custom configuration
 nvim_unstack.setup({

@@ -1,5 +1,6 @@
 local config = require("nvim-unstack.config")
 local getVisualSelection = require("nvim-unstack.util.get-visual-selection")
+local getFileLines = require("nvim-unstack.util.get-file-lines")
 local openMatches = require("nvim-unstack.util.open-matches")
 local tracebackFiletype = require("nvim-unstack.util.traceback-filetype")
 
@@ -39,6 +40,18 @@ function NvimUnstack.unstack_from_clipboard()
 
     local lines = vim.split(clipboard_content, "\n")
     parse_traceback_lines(lines, function(matches)
+        openMatches(matches)
+    end)
+end
+
+-- Parse traceback from file
+function NvimUnstack.unstack_from_file(filepath)
+    local file_content = getFileLines(filepath)
+    if not file_content or #file_content == 0 then
+        vim.notify("File not found or file contents empty.", vim.log.levels.WARN)
+        return
+    end
+    parse_traceback_lines(file_content, function(matches)
         openMatches(matches)
     end)
 end

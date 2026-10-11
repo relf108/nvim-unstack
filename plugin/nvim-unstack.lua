@@ -20,4 +20,7 @@ else
     vim.api.nvim_create_user_command("UnstackFromTmux", function()
         require("nvim-unstack").unstack_from_tmux()
     end, { desc = "Unstack traceback from tmux paste buffer" })
+    vim.api.nvim_create_user_command("UnstackFromFile", function(opts)
+        require("nvim-unstack").unstack_from_file(opts.args)
+    end, { nargs = 1, complete = "file", desc = "Unstack traceback from a filepath" })
 end
